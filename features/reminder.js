@@ -72,11 +72,11 @@ function parseReminderContent(content) {
     return { action, remindAt };
 }
 
-function scheduleReminder(reminder) {
+function scheduleReminder(reminder, client) {
     const delay = reminder.timestamp - Date.now();
 
     if (delay <= 0) {
-        sendReminder(reminder.id);
+        sendReminder(reminder.id, client);
         return;
     }
 
@@ -85,9 +85,9 @@ function scheduleReminder(reminder) {
     const timer = setTimeout(() => {
         reminderTimers.delete(reminder.id);
         if (delay <= maxDelay) {
-            sendReminder(reminder.id);
+            sendReminder(reminder.id, client);
         } else {
-            scheduleReminder(reminder);
+            scheduleReminder(reminder, client);
         }
     }, timeoutDelay);
 
@@ -132,7 +132,10 @@ function handleReminderMessage(client) {
         if (message.author.bot) return;
 
         const lower = message.content.toLowerCase();
+        console.log(`Message received: "${message.content}" from ${message.author.tag}`);
         if (!lower.startsWith('remind me')) return;
+        
+        console.log('Processing reminder request...');
 
         const parsed = parseReminderContent(message.content);
 
@@ -169,7 +172,7 @@ function handleReminderMessage(client) {
 
         reminders.push(reminder);
         persistReminders();
-        scheduleReminder(reminder);
+        scheduleReminder(reminder, client);
 
         const confirmationTime = formatDateTime(new Date(remindAtMs));
         await message.reply(`✅ Reminder set! I'll remind you ${confirmationTime}.`);
@@ -177,7 +180,7 @@ function handleReminderMessage(client) {
 }
 
 function loadRemindersOnReady(client) {
-    reminders.forEach(reminder => scheduleReminder(reminder));
+    reminders.forEach(reminder => scheduleReminder(reminder, client));
 }
 
 module.exports = {
