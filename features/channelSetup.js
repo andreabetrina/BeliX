@@ -17,6 +17,14 @@ async function ensureChessChannel(guild) {
     }
     
     try {
+        // Check if bot has permission to manage channels
+        const botMember = guild.members.cache.get(guild.client.user.id);
+        if (!botMember.permissions.has(PermissionFlagsBits.ManageChannels)) {
+            console.warn(`⚠ Bot lacks "Manage Channels" permission in ${guild.name}. Cannot create #${channelName}.`);
+            console.warn(`   Please grant the bot "Manage Channels" permission in Server Settings > Roles.`);
+            return null;
+        }
+
         // Create the chamber-of-chess channel
         const channel = await guild.channels.create({
             name: channelName,
@@ -54,3 +62,5 @@ function handleChannelSetup(client) {
 }
 
 module.exports = { handleChannelSetup, ensureChessChannel };
+
+        channel => channel.name === channelName && channel.type === ChannelType.GuildT
