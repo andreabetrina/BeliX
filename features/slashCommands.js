@@ -2,7 +2,6 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ActionRowBuilder
 const { loadPoints, buildLeaderboardEmbed, getLeaderboardButtons, buildMyPointsEmbed } = require('./leaderboard');
 const { loadTerminologies, postDailyTerminology } = require('./dailyTerminology');
 const { parseReminderContent, addReminder, generateReminderId, formatDateTime } = require('./reminder');
-const { runCode, EXECUTION_TIMEOUT } = require('./codeExecution');
 
 // Cache for guild members to avoid rate limiting
 const memberCache = new Map();
@@ -21,9 +20,7 @@ function buildHelpEmbed() {
             { name: '/next', value: 'Preview the next terminology (without changing today\'s).' },
             { name: '/prev', value: 'Preview the previous terminology.' },
             { name: '/remind', value: 'Set a reminder (e.g., "submit assignment tomorrow at 6 PM").' },
-            { name: '/run', value: 'Run code in Python or Java.' }
         )
-        .setFooter({ text: `Execution time limit: ${EXECUTION_TIMEOUT}ms` })
         .setTimestamp();
 }
 
@@ -122,25 +119,6 @@ function buildCommands() {
                 option
                     .setName('text')
                     .setDescription('What and when to remind you')
-                    .setRequired(true)
-            ),
-        new SlashCommandBuilder()
-            .setName('run')
-            .setDescription('Run code in Python or Java.')
-            .addStringOption(option =>
-                option
-                    .setName('language')
-                    .setDescription('Programming language')
-                    .setRequired(true)
-                    .addChoices(
-                        { name: 'Python', value: 'python' },
-                        { name: 'Java', value: 'java' }
-                    )
-            )
-            .addStringOption(option =>
-                option
-                    .setName('code')
-                    .setDescription('Code to execute')
                     .setRequired(true)
             )
     ].map(cmd => cmd.toJSON());
@@ -308,28 +286,6 @@ function handleSlashCommands(client) {
             addReminder(reminder, client);
             const confirmationTime = formatDateTime(new Date(remindAtMs));
             return interaction.reply(`✅ Reminder set! I'll remind you ${confirmationTime}.`);
-        }
-
-        if (commandName === 'run') {
-            const language = interaction.options.getString('language', true);
-            const code = interaction.options.getString('code', true);
-
-            await interaction.deferReply();
-
-            const result = await runCode(language, code);
-
-            let output = result.output;
-            if (output.length > 1900) {
-                output = output.substring(0, 1900) + '\n... (output truncated)';
-            }
-
-            const versionInfo = result.version || language;
-
-            if (result.success) {
-                return interaction.editReply(`Here is your ${versionInfo} output ${interaction.user}\n\`\`\`\n${output}\n\`\`\``);
-            }
-
-            return interaction.editReply(`❌ **${versionInfo} Error** ${interaction.user}\n\`\`\`\n${output}\n\`\`\``);
         }
     });
 }
