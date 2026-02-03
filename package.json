@@ -12,8 +12,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.93.3",
+    "chrono-node": "^2.7.7",
     "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3",
-    "chrono-node": "^2.7.7"
+    "dotenv": "^17.2.3"
   }
 }

@@ -1,0 +1,576 @@
+{
+  "terminologies": [
+    {
+      "category": "Programming & Development",
+      "term": "Algorithm",
+      "definition": "Step-by-step problem-solving procedure.",
+      "date": "Feb 2"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Data Structure",
+      "definition": "Organized way to store data (Arrays, Linked Lists, Stacks, Queues).",
+      "date": "Feb 3"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "OOP (Object-Oriented Programming)",
+      "definition": "Programming using objects & classes.",
+      "date": "Feb 4"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Class & Object",
+      "definition": "Blueprint (Class) and its instance (Object).",
+      "date": "Feb 5"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Inheritance",
+      "definition": "Reusing properties of a parent class.",
+      "date": "Feb 6"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Polymorphism",
+      "definition": "One function, multiple forms (e.g., method overloading).",
+      "date": "Feb 7"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Encapsulation",
+      "definition": "Bundling data with methods.",
+      "date": "Feb 8"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Abstraction",
+      "definition": "Hiding complex details.",
+      "date": "Feb 9"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Recursion",
+      "definition": "Function calling itself.",
+      "date": "Feb 10"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Loop (for, while, do-while)",
+      "definition": "Repeating code blocks.",
+      "date": "Feb 11"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Function/Method",
+      "definition": "Reusable code block.",
+      "date": "Feb 12"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "API (Application Programming Interface)",
+      "definition": "Rules for software communication.",
+      "date": "Feb 13"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Compiler",
+      "definition": "Converts entire code to machine language.",
+      "date": "Feb 14"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Interpreter",
+      "definition": "Executes code line-by-line.",
+      "date": "Feb 15"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Debugging",
+      "definition": "Finding & fixing errors in code.",
+      "date": "Feb 16"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "IDE (Integrated Development Environment)",
+      "definition": "Software for coding (VS Code, Eclipse).",
+      "date": "Feb 17"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Syntax Error",
+      "definition": "Code violates language rules.",
+      "date": "Feb 18"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Runtime Error",
+      "definition": "Error during program execution.",
+      "date": "Feb 19"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Logical Error",
+      "definition": "Code runs but gives wrong output.",
+      "date": "Feb 20"
+    },
+    {
+      "category": "Programming & Development",
+      "term": "Git & GitHub",
+      "definition": "Version control system for code.",
+      "date": "Feb 21"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "Database (DBMS)",
+      "definition": "System to store/manage data.",
+      "date": "Feb 22"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "SQL (Structured Query Language)",
+      "definition": "Language for databases.",
+      "date": "Feb 23"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "NoSQL",
+      "definition": "Non-relational databases (MongoDB).",
+      "date": "Feb 24"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "Primary Key",
+      "definition": "Unique identifier in a table.",
+      "date": "Feb 25"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "Foreign Key",
+      "definition": "Links two tables.",
+      "date": "Feb 26"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "Normalization",
+      "definition": "Reducing database redundancy.",
+      "date": "Feb 27"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "Indexing",
+      "definition": "Speeds up data retrieval.",
+      "date": "Feb 28"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "ACID Properties",
+      "definition": "(Atomicity, Consistency, Isolation, Durability).",
+      "date": "Mar 1"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "CRUD Operations",
+      "definition": "Create, Read, Update, Delete.",
+      "date": "Mar 2"
+    },
+    {
+      "category": "Databases & SQL",
+      "term": "Transaction",
+      "definition": "A sequence of database operations.",
+      "date": "Mar 3"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Kernel",
+      "definition": "Core part of OS managing hardware.",
+      "date": "Mar 4"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Process",
+      "definition": "Running instance of a program.",
+      "date": "Mar 5"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Thread",
+      "definition": "Lightweight sub-process.",
+      "date": "Mar 6"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Deadlock",
+      "definition": "Two processes blocking each other.",
+      "date": "Mar 7"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Scheduling (FCFS, Round Robin, SJF)",
+      "definition": "CPU task management.",
+      "date": "Mar 8"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Virtual Memory",
+      "definition": "Using disk as extended RAM.",
+      "date": "Mar 9"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "File System",
+      "definition": "How OS stores files (NTFS, FAT32).",
+      "date": "Mar 10"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Shell",
+      "definition": "User interface to access OS.",
+      "date": "Mar 11"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Multitasking",
+      "definition": "Running multiple tasks simultaneously.",
+      "date": "Mar 12"
+    },
+    {
+      "category": "Operating Systems (OS)",
+      "term": "Cache Memory",
+      "definition": "Fast memory for frequent data.",
+      "date": "Mar 13"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "IP Address",
+      "definition": "Unique identifier for devices.",
+      "date": "Mar 14"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "TCP/IP",
+      "definition": "Internet communication protocol.",
+      "date": "Mar 15"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "HTTP/HTTPS",
+      "definition": "Web data transfer protocols.",
+      "date": "Mar 16"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "DNS (Domain Name System)",
+      "definition": "Converts URLs to IPs.",
+      "date": "Mar 17"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "Firewall",
+      "definition": "Security system blocking threats.",
+      "date": "Mar 18"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "Router",
+      "definition": "Device directing network traffic.",
+      "date": "Mar 19"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "Latency",
+      "definition": "Delay in data transfer.",
+      "date": "Mar 20"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "Bandwidth",
+      "definition": "Maximum data transfer rate.",
+      "date": "Mar 21"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "Cloud Computing",
+      "definition": "Remote servers over the internet (AWS, Azure).",
+      "date": "Mar 22"
+    },
+    {
+      "category": "Networking & Web",
+      "term": "VPN (Virtual Private Network)",
+      "definition": "Secure private network over the internet.",
+      "date": "Mar 23"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Array",
+      "definition": "Fixed-size sequential data.",
+      "date": "Mar 24"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Linked List",
+      "definition": "Dynamic data structure (Singly/Doubly LL).",
+      "date": "Mar 25"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Stack (LIFO)",
+      "definition": "Last-In-First-Out structure.",
+      "date": "Mar 26"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Queue (FIFO)",
+      "definition": "First-In-First-Out structure.",
+      "date": "Mar 27"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Tree",
+      "definition": "Hierarchical data structure.",
+      "date": "Mar 28"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Binary Tree",
+      "definition": "Tree with max two children per node.",
+      "date": "Mar 29"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "BST (Binary Search Tree)",
+      "definition": "Sorted binary tree.",
+      "date": "Mar 30"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Graph",
+      "definition": "Nodes connected by edges.",
+      "date": "Mar 31"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Hash Table",
+      "definition": "Key-value storage (O(1) avg. time).",
+      "date": "Apr 1"
+    },
+    {
+      "category": "Data Structures & Algorithms (DSA)",
+      "term": "Big-O Notation",
+      "definition": "Measures algorithm efficiency.",
+      "date": "Apr 2"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "SDLC (Software Development Life Cycle)",
+      "definition": "Stages of software creation.",
+      "date": "Apr 3"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "Agile Methodology",
+      "definition": "Iterative development approach.",
+      "date": "Apr 4"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "Scrum",
+      "definition": "Agile framework for teamwork.",
+      "date": "Apr 5"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "Waterfall Model",
+      "definition": "Linear project approach.",
+      "date": "Apr 6"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "Testing (Unit, Integration, System)",
+      "definition": "Checking software for bugs.",
+      "date": "Apr 7"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "Debugging",
+      "definition": "Fixing errors in code.",
+      "date": "Apr 8"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "Version Control (Git, SVN)",
+      "definition": "Tracking code changes.",
+      "date": "Apr 9"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "CI/CD (Continuous Integration/Deployment)",
+      "definition": "Automating software delivery.",
+      "date": "Apr 10"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "UML (Unified Modeling Language)",
+      "definition": "Diagramming software design.",
+      "date": "Apr 11"
+    },
+    {
+      "category": "Software Engineering",
+      "term": "API Testing",
+      "definition": "Checking API functionality.",
+      "date": "Apr 12"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Encryption",
+      "definition": "Securing data using algorithms.",
+      "date": "Apr 13"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Decryption",
+      "definition": "Converting encrypted data back.",
+      "date": "Apr 14"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Malware",
+      "definition": "Harmful software (virus, trojan).",
+      "date": "Apr 15"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Phishing",
+      "definition": "Fraudulent attempts to steal data.",
+      "date": "Apr 16"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Brute Force Attack",
+      "definition": "Trying all password combinations.",
+      "date": "Apr 17"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Two-Factor Authentication (2FA)",
+      "definition": "Extra login security.",
+      "date": "Apr 18"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Ethical Hacking",
+      "definition": "Legal hacking to improve security.",
+      "date": "Apr 19"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Penetration Testing",
+      "definition": "Simulating cyberattacks.",
+      "date": "Apr 20"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "GDPR (General Data Protection Regulation)",
+      "definition": "Data privacy law.",
+      "date": "Apr 21"
+    },
+    {
+      "category": "Cybersecurity & Ethics",
+      "term": "Cyber Law (IT Act, India)",
+      "definition": "Legal rules for digital activities.",
+      "date": "Apr 22"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "AI (Artificial Intelligence)",
+      "definition": "Machines mimicking human intelligence.",
+      "date": "Apr 23"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "ML (Machine Learning)",
+      "definition": "AI subset where systems learn from data.",
+      "date": "Apr 24"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "Deep Learning",
+      "definition": "ML using neural networks.",
+      "date": "Apr 25"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "Neural Network",
+      "definition": "Brain-inspired algorithm.",
+      "date": "Apr 26"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "Blockchain",
+      "definition": "Decentralized ledger (Bitcoin, Ethereum).",
+      "date": "Apr 27"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "IoT (Internet of Things)",
+      "definition": "Smart connected devices.",
+      "date": "Apr 28"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "AR/VR (Augmented/Virtual Reality)",
+      "definition": "Digital overlays on real world.",
+      "date": "Apr 29"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "Quantum Computing",
+      "definition": "Super-fast computing using qubits.",
+      "date": "Apr 30"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "5G Technology",
+      "definition": "Next-gen high-speed internet.",
+      "date": "May 1"
+    },
+    {
+      "category": "Emerging Technologies",
+      "term": "Edge Computing",
+      "definition": "Processing data near its source.",
+      "date": "May 2"
+    },
+    {
+      "category": "Mathematics for CS",
+      "term": "Discrete Mathematics",
+      "definition": "Math for CS (logic, sets, graphs).",
+      "date": "May 3"
+    },
+    {
+      "category": "Mathematics for CS",
+      "term": "Boolean Algebra",
+      "definition": "Math of true/false logic.",
+      "date": "May 4"
+    },
+    {
+      "category": "Mathematics for CS",
+      "term": "Linear Algebra",
+      "definition": "Vectors, matrices for ML/graphics.",
+      "date": "May 5"
+    },
+    {
+      "category": "Mathematics for CS",
+      "term": "Probability & Statistics",
+      "definition": "Essential for AI/ML.",
+      "date": "May 6"
+    },
+    {
+      "category": "Mathematics for CS",
+      "term": "Calculus",
+      "definition": "Used in optimization (e.g., gradient descent).",
+      "date": "May 7"
+    }
+  ],
+  "currentIndex": 0,
+  "lastPostedDate": "2026-02-02T11:51:41.781Z"
+}

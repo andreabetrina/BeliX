@@ -42,11 +42,11 @@ function formatDateTime(date) {
 
 function parseReminderContent(content) {
     const match = content.match(/remind me\s*(to)?\s*(.+)/i);
-    if (!match || !match[2]) {
+    const reminderText = match && match[2] ? match[2].trim() : content.trim();
+
+    if (!reminderText) {
         return { error: 'format' };
     }
-
-    const reminderText = match[2].trim();
     const parsed = chrono.parse(reminderText, new Date(), { forwardDate: true });
 
     if (!parsed.length) {
@@ -92,6 +92,12 @@ function scheduleReminder(reminder, client) {
     }, timeoutDelay);
 
     reminderTimers.set(reminder.id, timer);
+}
+
+function addReminder(reminder, client) {
+    reminders.push(reminder);
+    persistReminders();
+    scheduleReminder(reminder, client);
 }
 
 async function sendReminder(reminderId, client) {
@@ -170,9 +176,7 @@ function handleReminderMessage(client) {
             createdAt: Date.now(),
         };
 
-        reminders.push(reminder);
-        persistReminders();
-        scheduleReminder(reminder, client);
+        addReminder(reminder, client);
 
         const confirmationTime = formatDateTime(new Date(remindAtMs));
         await message.reply(`✅ Reminder set! I'll remind you ${confirmationTime}.`);
@@ -190,6 +194,7 @@ module.exports = {
     formatDateTime,
     parseReminderContent,
     scheduleReminder,
+    addReminder,
     sendReminder,
     initializeReminders,
     handleReminderMessage,
