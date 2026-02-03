@@ -567,6 +567,160 @@ async function addBelmontsPointsByDiscordUsername(discordUsername, pointsToAdd) 
     }
 }
 
+// ============ Meetings Operations ============
+
+async function createMeeting(meetingData) {
+    if (!dbAvailable) return null;
+    try {
+        const {
+            title,
+            meeting_date,
+            meeting_time,
+            scheduled_time,
+            total_members,
+        } = meetingData;
+
+        const { data, error } = await supabase
+            .from('meetings')
+            .insert({
+                title,
+                meeting_date,
+                meeting_time,
+                scheduled_time,
+                total_members,
+                attended_members: 0,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .select();
+
+        if (error) {
+            console.error('Error creating meeting:', error);
+            return null;
+        }
+
+        return data?.[0] || null;
+    } catch (error) {
+        console.error('Error creating meeting:', error);
+        return null;
+    }
+}
+
+async function updateMeetingEnd(meetingId, endData) {
+    if (!dbAvailable) return null;
+    try {
+        const {
+            end_time,
+            duration_minutes,
+            attended_members,
+        } = endData;
+
+        const { data, error } = await supabase
+            .from('meetings')
+            .update({
+                end_time,
+                duration_minutes,
+                attended_members,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('meeting_id', meetingId)
+            .select();
+
+        if (error) {
+            console.error('Error updating meeting:', error);
+            return null;
+        }
+
+        return data?.[0] || null;
+    } catch (error) {
+        console.error('Error ending meeting:', error);
+        return null;
+    }
+}
+
+async function recordAttendance(meetingId, attendanceData) {
+    if (!dbAvailable) return null;
+    try {
+        const { data, error } = await supabase
+            .from('meeting_attendance')
+            .insert(
+                Array.isArray(attendanceData) ? attendanceData : [attendanceData]
+            )
+            .select();
+
+        if (error) {
+            console.error('Error recording attendance:', error);
+            return null;
+        }
+
+        return data || null;
+    } catch (error) {
+        console.error('Error recording attendance:', error);
+        return null;
+    }
+}
+
+async function getMeetingAttendance(meetingId) {
+    if (!dbAvailable) return [];
+    try {
+        const { data, error } = await supabase
+            .from('meeting_attendance')
+            .select('*')
+            .eq('meeting_id', meetingId)
+            .order('total_duration_minutes', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching attendance:', error);
+            return [];
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Error getting meeting attendance:', error);
+        return [];
+    }
+}
+
+async function getMeetings(limit = 30) {
+    if (!dbAvailable) return [];
+    try {
+        const { data, error } = await supabase
+            .from('meetings')
+            .select('*')
+            .order('meeting_date', { ascending: false })
+            .limit(limit);
+
+        if (error) {
+            console.error('Error fetching meetings:', error);
+            return [];
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Error getting meetings:', error);
+        return [];
+    }
+}
+
+async function getMeetingStats() {
+    if (!dbAvailable) return null;
+    try {
+        const { data, error } = await supabase
+            .from('meetings')
+            .select('count()');
+
+        if (error) {
+            console.error('Error fetching meeting stats:', error);
+            return null;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error getting meeting stats:', error);
+        return null;
+    }
+}
+
 module.exports = {
     syncMember,
     getMember,
@@ -588,4 +742,11 @@ module.exports = {
     getDiscordActivitySummary,
     getMemberByDiscordUsername,
     addBelmontsPointsByDiscordUsername,
+    // Meetings functions
+    createMeeting,
+    updateMeetingEnd,
+    recordAttendance,
+    getMeetingAttendance,
+    getMeetings,
+    getMeetingStats,
 };

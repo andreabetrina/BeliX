@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { EmbedBuilder } = require('discord.js');
 
-const TERMINOLOGY_FILE = path.join(__dirname, '../terminologies.json');
+const TERMINOLOGY_FILE = path.join(__dirname, '..', 'json', 'terminologies.json');
 
 /**
  * Load terminologies from file

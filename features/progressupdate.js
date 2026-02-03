@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { getMemberByDiscordUsername, addBelmontsPointsByDiscordUsername } = require('../database/db');
+const { getMemberByDiscordUsername, addBelmontsPointsByDiscordUsername, addPoints } = require('../database/db');
 
-const pointsFilePath = path.join(__dirname, '..', 'points.json');
+const pointsFilePath = path.join(__dirname, '..', 'json', 'points.json');
 
 function loadPointsFile() {
     try {
@@ -41,7 +41,11 @@ module.exports = {
                         let newPoints = null;
 
                         if (existingMember) {
+                            // Award points and also add to points table for history
                             newPoints = await addBelmontsPointsByDiscordUsername(username, pointsToAward);
+                            
+                            // Also add to points table
+                            await addPoints(existingMember.member_id, pointsToAward);
                         } else {
                             const pointsData = loadPointsFile();
                             const current = pointsData[userId]?.points || 0;
