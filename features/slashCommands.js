@@ -1,8 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { buildLeaderboardEmbed, getLeaderboardButtons, buildMyPointsEmbed } = require('./leaderboard');
 const { loadTerminologies, postDailyTerminology } = require('./dailyTerminology');
-const { parseReminderContent, addReminder, generateReminderId, formatDateTime } = require('./reminder');
-const { getLeaderboard, getMember, getPoints, initializePoints } = require('../database/db');
+const { getLeaderboard, getMember, getPoints, initializePoints, syncMember } = require('../database/db');
+const fs = require('fs');
+const path = require('path');
 
 // Cache for guild members to avoid rate limiting
 const memberCache = new Map();
@@ -19,7 +20,8 @@ function buildHelpEmbed() {
             { name: '/terminology', value: 'Show today\'s terminology.' },
             { name: '/next', value: 'Preview the next terminology (without changing today\'s).' },
             { name: '/prev', value: 'Preview the previous terminology.' },
-            { name: '/remind', value: 'Set a reminder (e.g., "submit assignment tomorrow at 6 PM").' },
+            { name: '/dailyquestions', value: 'Browse daily programming questions with pagination.' },
+            { name: '/question <number>', value: 'View a specific question (1-129) with full details.' }
         )
         .setTimestamp();
 }
@@ -89,6 +91,88 @@ function getPreviousTerminologyEmbed() {
         .setTimestamp();
 }
 
+function loadQuestions() {
+    const questionsPath = path.join(__dirname, '../json/dailyQuestion.json');
+    const data = fs.readFileSync(questionsPath, 'utf-8');
+    return JSON.parse(data);
+}
+
+function buildQuestionsEmbed(questions, startIndex = 0, itemsPerPage = 5) {
+    const questions_list = questions.slice(startIndex, startIndex + itemsPerPage);
+    
+    const embed = new EmbedBuilder()
+        .setColor('#f39c12')
+        .setTitle('📝 Daily Programming Questions')
+        .setDescription('Select a question to view details')
+        .setFooter({ text: `Showing ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, questions.length)} of ${questions.length} questions` });
+    
+    questions_list.forEach(q => {
+        const value = `**Input:** ${q.Input}\n**Output:** ${q.Output}`;
+        embed.addField(`Day ${q.Day}: ${q.Question}`, value, false);
+    });
+    
+    return embed;
+}
+
+function getQuestionsNavigationButtons(currentPage, totalPages) {
+    const buttons = new ActionRowBuilder();
+    
+    if (currentPage > 1) {
+        buttons.addComponents(
+            new ButtonBuilder()
+                .setCustomId(`questions_back_${currentPage - 1}`)
+                .setLabel('⬅️ Previous')
+                .setStyle(ButtonStyle.Primary)
+        );
+    }
+    
+    buttons.addComponents(
+        new ButtonBuilder()
+            .setCustomId('questions_page')
+            .setLabel(`Page ${currentPage}/${totalPages}`)
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true)
+    );
+    
+    if (currentPage < totalPages) {
+        buttons.addComponents(
+            new ButtonBuilder()
+                .setCustomId(`questions_next_${currentPage + 1}`)
+                .setLabel('Next ➡️')
+                .setStyle(ButtonStyle.Primary)
+        );
+    }
+    
+    return buttons;
+}
+
+function buildQuestionDetailEmbed(question) {
+    const embed = new EmbedBuilder()
+        .setColor('#27ae60')
+        .setTitle(`Day ${question.Day}: ${question.Question}`)
+        .addFields(
+            { name: '📥 Input', value: question.Input, inline: false },
+            { name: '📤 Output', value: String(question.Output), inline: false },
+            { name: '📝 Explanation', value: question.Explain, inline: false }
+        );
+    
+    if (question.Formula) {
+        embed.addField('📐 Formula', question.Formula, false);
+    }
+    
+    if (question.Method) {
+        embed.addFields(
+            { name: '🔧 Method', value: question.Method, inline: true },
+            { name: '📞 Main Call', value: question['Main Call'], inline: true }
+        );
+    }
+    
+    embed.setFooter({ text: `Question ${question.Day}/129` });
+    embed.setTimestamp();
+    
+    return embed;
+}
+
 function buildCommands() {
     return [
         new SlashCommandBuilder()
@@ -110,13 +194,17 @@ function buildCommands() {
             .setName('prev')
             .setDescription('Preview the previous terminology.'),
         new SlashCommandBuilder()
-            .setName('remind')
-            .setDescription('Set a reminder using natural language.')
-            .addStringOption(option =>
-                option
-                    .setName('text')
-                    .setDescription('What and when to remind you')
+            .setName('dailyquestions')
+            .setDescription('Browse daily programming questions with solutions.'),
+        new SlashCommandBuilder()
+            .setName('question')
+            .setDescription('Get a specific programming question by number (1-129).')
+            .addIntegerOption(option =>
+                option.setName('number')
+                    .setDescription('Question number (1-129)')
                     .setRequired(true)
+                    .setMinValue(1)
+                    .setMaxValue(129)
             )
     ].map(cmd => cmd.toJSON());
 }
@@ -178,10 +266,28 @@ function handleSlashCommands(client) {
 
                 return interaction.update({ embeds: [embed], components: [buttons] });
             }
+            
+            // Handle questions pagination buttons
+            if (interaction.customId.startsWith('questions_')) {
+                const [, direction, page] = interaction.customId.split('_');
+                const currentPage = parseInt(page);
+                const questions = loadQuestions();
+                const totalPages = Math.ceil(questions.length / 5);
+                
+                let newPage = currentPage;
+                if (direction === 'next') newPage = Math.min(currentPage + 1, totalPages);
+                if (direction === 'back') newPage = Math.max(currentPage - 1, 1);
+
+                const startIndex = (newPage - 1) * 5;
+                const embed = buildQuestionsEmbed(questions, startIndex);
+                const buttons = getQuestionsNavigationButtons(newPage, totalPages);
+
+                return interaction.update({ embeds: [embed], components: [buttons] });
+            }
             return;
         }
 
-        if (!interaction.isChatInputCommand()) return;
+        if (!interaction.isCommand()) return;
 
         const { commandName } = interaction;
 
@@ -200,6 +306,8 @@ function handleSlashCommands(client) {
         }
 
         if (commandName === 'mypoints') {
+            // Ensure member exists in database first
+            await syncMember(interaction.member, interaction.guild);
             await initializePoints(interaction.user.id);
             const memberData = await getMember(interaction.user.id);
             const pointsData = await getPoints(interaction.user.id);
@@ -238,42 +346,34 @@ function handleSlashCommands(client) {
             return interaction.reply({ embeds: [embed] });
         }
 
-        if (commandName === 'remind') {
-            const text = interaction.options.getString('text', true);
-            const parsed = parseReminderContent(text);
+        if (commandName === 'dailyquestions') {
+            const questions = loadQuestions();
+            const totalPages = Math.ceil(questions.length / 5);
+            const embed = buildQuestionsEmbed(questions, 0);
+            const buttons = getQuestionsNavigationButtons(1, totalPages);
 
-            if (parsed.error === 'missing-time') {
-                return interaction.reply('Please include when to remind you, e.g., "submit my assignment tomorrow at 6 PM".');
+            return interaction.reply({ embeds: [embed], components: [buttons] });
+        }
+
+        if (commandName === 'question') {
+            const questionNumber = interaction.options.getInteger('number');
+            const questions = loadQuestions();
+            
+            // Find question by Day number
+            const question = questions.find(q => q.Day === questionNumber);
+            
+            if (!question) {
+                return interaction.reply({
+                    content: `❌ Question #${questionNumber} not found. Available questions: 1-129`,
+                    ephemeral: true
+                });
             }
-
-            if (parsed.error === 'invalid-time') {
-                return interaction.reply('That time looks invalid. Try something like "in 20 minutes" or "tomorrow at 6 PM".');
-            }
-
-            if (parsed.error === 'missing-action' || parsed.error === 'format') {
-                return interaction.reply('Please include what to remind you about, e.g., "call Alex at 4 PM".');
-            }
-
-            const remindAtMs = parsed.remindAt.getTime();
-
-            if (remindAtMs <= Date.now()) {
-                return interaction.reply('That time seems to be in the past. Please provide a future time.');
-            }
-
-            const reminder = {
-                id: generateReminderId(),
-                userId: interaction.user.id,
-                channelId: interaction.channelId,
-                message: parsed.action,
-                timestamp: remindAtMs,
-                createdAt: Date.now(),
-            };
-
-            addReminder(reminder, client);
-            const confirmationTime = formatDateTime(new Date(remindAtMs));
-            return interaction.reply(`✅ Reminder set! I'll remind you ${confirmationTime}.`);
+            
+            const embed = buildQuestionDetailEmbed(question);
+            return interaction.reply({ embeds: [embed] });
         }
     });
 }
 
 module.exports = { handleSlashCommands };
+

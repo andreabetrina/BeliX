@@ -6,7 +6,11 @@ function createWelcomeEmbed(member, memberNumber) {
     return new EmbedBuilder()
         .setColor('#d5a147')
         .setTitle('🎉 Welcome to Belmonts!')
-        .setDescription(`**Welcome ${displayName}!**\n\nYou are member **#${memberNumber}**`)
+        .setDescription(
+            `**Welcome ${displayName}!**\n\n` +
+            `You're officially part of a community where developers, sysadmins, AI/ML explorers, data scientists, and hardware tinkerers all come together. 🎉\n\n` +
+            `You are member **#${memberNumber}**`
+        )
         .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
         .setTimestamp()
         .setFooter({ text: 'Belmonts Server' });

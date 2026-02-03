@@ -7,7 +7,7 @@ const {
     TextInputBuilder,
     TextInputStyle,
 } = require('discord.js');
-const { addPoints, initializePoints } = require('../database/db');
+const { addPoints, initializePoints, createMeeting, updateMeetingEnd, recordAttendance } = require('../database/db');
 
 const MEETING_VOICE_CHANNEL_ID = process.env.MEETING_VOICE_CHANNEL_ID || '1304848107095326830';
 const MEETING_TEXT_CHANNEL_ID = process.env.MEETING_TEXT_CHANNEL_ID || '1304848107095326831';
@@ -174,6 +174,7 @@ function buildMeetingReportEmbed({ meetingDate, scheduledLabel, durationLabel, a
 function getOrCreateState(guildId) {
     if (!guildStates.has(guildId)) {
         guildStates.set(guildId, {
+            meetingId: null,
             scheduledAt: null,
             scheduledLabel: null,
             startTimeout: null,
@@ -259,6 +260,21 @@ async function startMeeting(guild) {
     state.participants = new Map();
     state.trackedMembers = await resolveTrackedMembers(guild);
 
+    // Create meeting record in database
+    const meetingDate = new Date(state.startAt);
+    const dateStr = meetingDate.toISOString().split('T')[0];
+    const timeStr = meetingDate.toTimeString().slice(0, 5);
+    
+    const meetingRecord = await createMeeting({
+        title: `Daily Gathering - ${dateStr}`,
+        meeting_date: dateStr,
+        meeting_time: timeStr,
+        scheduled_time: state.scheduledLabel || timeStr,
+        total_members: state.trackedMembers.size,
+    });
+
+    state.meetingId = meetingRecord?.meeting_id || null;
+
     const now = Date.now();
     for (const member of voiceChannel.members.values()) {
         if (state.trackedMembers.has(member.user.id)) {
@@ -291,8 +307,12 @@ async function endMeeting(guild) {
     }
 
     const durationMs = Math.max(0, state.endAt - state.startAt);
+    const durationMinutes = Math.round(durationMs / 60000);
 
     const attendanceLines = [];
+    const attendanceRecords = [];
+    let attendedCount = 0;
+
     for (const [userId, member] of state.trackedMembers.entries()) {
         const record = state.participants.get(userId);
         const attendedMs = record?.totalMs || 0;
@@ -302,10 +322,37 @@ async function endMeeting(guild) {
 
         attendanceLines.push(`• **${nameLabel}** — ${percentageLabel} (${formatDuration(attendedMs)})`);
 
+        let pointsAwarded = 0;
         if (percentage > 50) {
             await initializePoints(userId);
             await addPoints(userId, 5);
+            pointsAwarded = 5;
+            attendedCount++;
         }
+
+        // Record attendance in database
+        attendanceRecords.push({
+            meeting_id: state.meetingId,
+            member_id: userId,
+            username: member.user.username,
+            display_name: nameLabel,
+            total_duration_minutes: Math.round(attendedMs / 60000),
+            attendance_percentage: parseFloat(percentage.toFixed(2)),
+            points_awarded: pointsAwarded,
+            created_at: new Date().toISOString(),
+        });
+    }
+
+    // Save meeting to database
+    if (state.meetingId) {
+        await updateMeetingEnd(state.meetingId, {
+            end_time: new Date(state.endAt).toISOString(),
+            duration_minutes: durationMinutes,
+            attended_members: attendedCount,
+        });
+
+        // Record all attendance
+        await recordAttendance(state.meetingId, attendanceRecords);
     }
 
     const meetingDate = new Date(state.startAt).toLocaleDateString();
@@ -327,6 +374,7 @@ async function endMeeting(guild) {
     state.endAt = null;
     state.participants = new Map();
     state.trackedMembers = new Map();
+    state.meetingId = null;
 }
 
 function handleVoiceStateUpdate(oldState, newState) {

@@ -92,3 +92,44 @@ create table public.points (
 ) TABLESPACE pg_default;
 
 create index if not exists idx_points_member_id on public.points using btree (member_id) TABLESPACE pg_default;
+-- Meetings table to track clan gatherings
+create table public.meetings (
+  meeting_id bigserial not null,
+  title text not null,
+  meeting_date date not null,
+  meeting_time time not null,
+  scheduled_time time null,
+  start_time timestamp with time zone null,
+  end_time timestamp with time zone null,
+  duration_minutes integer null,
+  total_members integer not null default 0,
+  attended_members integer not null default 0,
+  metadata jsonb null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint meetings_pkey primary key (meeting_id)
+) TABLESPACE pg_default;
+
+create index if not exists idx_meetings_date on public.meetings using btree (meeting_date) TABLESPACE pg_default;
+
+-- Meeting attendance table to track individual member attendance
+create table public.meeting_attendance (
+  attendance_id bigserial not null,
+  meeting_id bigint not null,
+  member_id bigint not null,
+  username text not null,
+  display_name text null,
+  joined_at timestamp with time zone null,
+  left_at timestamp with time zone null,
+  total_duration_minutes integer null default 0,
+  attendance_percentage numeric(5,2) null,
+  points_awarded integer null default 0,
+  created_at timestamp with time zone not null default now(),
+  constraint meeting_attendance_pkey primary key (attendance_id),
+  constraint meeting_attendance_meeting_id_fkey foreign key (meeting_id) references meetings (meeting_id) on delete cascade,
+  constraint meeting_attendance_member_id_fkey foreign key (member_id) references members (member_id) on delete cascade
+) TABLESPACE pg_default;
+
+create index if not exists idx_meeting_attendance_meeting_id on public.meeting_attendance using btree (meeting_id) TABLESPACE pg_default;
+
+create index if not exists idx_meeting_attendance_member_id on public.meeting_attendance using btree (member_id) TABLESPACE pg_default;

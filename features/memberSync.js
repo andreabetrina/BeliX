@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { getMemberByDiscordUsername, trackDiscordActivity, updateMemberRole } = require('../database/db');
 
-const syncStatePath = path.join(__dirname, '..', 'memberSyncState.json');
+const syncStatePath = path.join(__dirname, '..', 'json', 'memberSyncState.json');
 
 function loadSyncState() {
     try {
