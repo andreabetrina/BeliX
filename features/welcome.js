@@ -17,6 +17,15 @@ function createWelcomeEmbed(member, memberNumber) {
 }
 
 function findWelcomeChannel(guild) {
+    // First try environment variable
+    const channelId = process.env.introduction;
+    if (channelId) {
+        const channel = guild.channels.cache.get(channelId);
+        if (channel && channel.isTextBased() && channel.permissionsFor(guild.members.me)?.has('SendMessages')) {
+            return channel;
+        }
+    }
+    // Fallback to name matching
     const preferred = ['introduction', 'introductions', 'welcome', 'general'];
     return guild.channels.cache.find(
         ch => ch.isTextBased()
@@ -36,11 +45,8 @@ function handleWelcomeMessage(client) {
             const memberNumber = member.guild.memberCount;
             console.log(`Total members: ${memberNumber}`);
             
-            // Find introduction channel with emoji
-            const channel = member.guild.channels.cache.find(ch => 
-                ch.isTextBased() && 
-                (ch.name.toLowerCase().includes('introduction') || ch.name.includes('⌛'))
-            );
+            // Find introduction channel
+            const channel = findWelcomeChannel(member.guild);
             
             console.log(`Channel found: ${channel ? channel.name : 'not found'}`);
             

@@ -8,7 +8,14 @@ const BIRTHDAY_CHECK_MINUTE = 0;
  * Find the announcements channel
  */
 function findAnnouncementsChannel(guild) {
-    // Look for channels with "announcement", "announcements", or 📢 emoji
+    const channelId = process.env.announcements;
+    if (channelId) {
+        const channel = guild.channels.cache.get(channelId);
+        if (channel && channel.type === ChannelType.GuildText && channel.permissionsFor(guild.members.me)?.has('SendMessages')) {
+            return channel;
+        }
+    }
+    // Fallback to name matching
     return guild.channels.cache.find(ch => 
         ch.type === ChannelType.GuildText &&
         ch.permissionsFor(guild.members.me)?.has('SendMessages') &&

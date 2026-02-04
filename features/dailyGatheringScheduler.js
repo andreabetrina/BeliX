@@ -17,6 +17,11 @@ function isGatheringManager(member) {
 }
 
 function findTinkeringChannel(guild) {
+    const channelId = process.env.tinkering;
+    if (channelId) {
+        return guild.channels.cache.get(channelId);
+    }
+    // Fallback to name matching
     return guild.channels.cache.find(channel =>
         channel.isTextBased() &&
         channel.name?.toLowerCase().includes('tinkering')
@@ -24,6 +29,11 @@ function findTinkeringChannel(guild) {
 }
 
 function findCommonHallChannel(guild) {
+    const channelId = process.env['common-hall'];
+    if (channelId) {
+        return guild.channels.cache.get(channelId);
+    }
+    // Fallback to name matching
     return guild.channels.cache.find(channel =>
         channel.isTextBased() &&
         ['common hall', 'common-hall', 'commonhall'].some(name =>

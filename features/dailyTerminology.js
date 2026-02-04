@@ -32,7 +32,14 @@ function saveTerminologies(data) {
  * Find the common hall channel
  */
 function findCommonHallChannel(guild) {
-    // Look for channels with "common", "hall", "general" in name
+    const channelId = process.env['common-hall'];
+    if (channelId) {
+        const channel = guild.channels.cache.get(channelId);
+        if (channel && channel.isTextBased()) {
+            return channel;
+        }
+    }
+    // Fallback to name matching
     const channelNames = ['common-hall', 'commonhall', 'common', 'hall', 'general'];
     
     return guild.channels.cache.find(ch => 

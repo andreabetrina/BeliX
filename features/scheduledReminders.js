@@ -10,6 +10,7 @@ const REMINDERS = [
         description: 'It\'s time for our daily gathering! Let\'s connect, share, and grow together. See you in the voice channel! 🎤',
         color: '#FFD700',
         channelNames: ['announcements', 'general', 'common-hall', 'common hall'],
+        envKey: 'announcements',
     },
     {
         name: 'Progress Update (1st)',
@@ -19,6 +20,7 @@ const REMINDERS = [
         description: 'Time to share your progress! What have you accomplished today? Share your wins in Byte Bash Blitz! 💪',
         color: '#00D9FF',
         channelNames: ['byte-bash-blitz', 'progress', 'updates', 'announcements'],
+        envKey: 'announcements',
     },
     {
         name: 'Progress Update (2nd)',
@@ -28,13 +30,25 @@ const REMINDERS = [
         description: 'Second round of progress updates! Keep sharing your achievements and updates. Let\'s celebrate every milestone! 🎉',
         color: '#00FF88',
         channelNames: ['byte-bash-blitz', 'progress', 'updates', 'announcements'],
+        envKey: 'announcements',
     },
 ];
 
 /**
- * Find a channel that matches the provided names
+ * Find a channel that matches the provided names or environment variable
  */
-function findTargetChannel(guild, channelNames) {
+function findTargetChannel(guild, channelNames, envKey) {
+    // First try environment variable if provided
+    if (envKey) {
+        const channelId = process.env[envKey];
+        if (channelId) {
+            const channel = guild.channels.cache.get(channelId);
+            if (channel && channel.type === ChannelType.GuildText && channel.permissionsFor(guild.members.me)?.has('SendMessages')) {
+                return channel;
+            }
+        }
+    }
+    // Fallback to name matching
     return guild.channels.cache.find(ch =>
         ch.type === ChannelType.GuildText &&
         ch.permissionsFor(guild.members.me)?.has('SendMessages') &&
@@ -61,7 +75,7 @@ async function sendScheduledReminder(client, reminder) {
         console.log(`⏰ Sending scheduled reminder: "${reminder.name}"`);
 
         for (const guild of client.guilds.cache.values()) {
-            const channel = findTargetChannel(guild, reminder.channelNames);
+            const channel = findTargetChannel(guild, reminder.channelNames, reminder.envKey);
 
             if (!channel) {
                 console.warn(`⚠ No suitable channel found in ${guild.name} for "${reminder.name}"`);

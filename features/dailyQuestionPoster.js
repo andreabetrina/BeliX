@@ -57,11 +57,18 @@ async function postDailyQuestion(client) {
     
     // Post to all guilds in the vibe-code channel
     for (const guild of client.guilds.cache.values()) {
-      const channel = guild.channels.cache.find(ch => 
-        ch.name.toLowerCase().includes('vibe') && 
-        ch.name.toLowerCase().includes('code') &&
-        ch.isTextBased()
-      );
+      const channelId = process.env['vibe-coding'];
+      let channel = null;
+      if (channelId) {
+        channel = guild.channels.cache.get(channelId);
+      } else {
+        // Fallback to name matching
+        channel = guild.channels.cache.find(ch => 
+          ch.name.toLowerCase().includes('vibe') && 
+          ch.name.toLowerCase().includes('code') &&
+          ch.isTextBased()
+        );
+      }
       
       if (channel) {
         try {
