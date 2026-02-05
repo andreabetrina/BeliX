@@ -218,6 +218,20 @@ async function addPoints(memberId, pointsToAdd) {
             console.error('Failed to update members.belmonts_points:', memberError.message);
             return null;
         }
+
+        // Insert a new points log row for each award
+        const { error: pointsError } = await supabase
+            .from('points')
+            .insert({
+                member_id: id,
+                points: pointsToAdd,
+                last_update: timestamp,
+                updated_at: timestamp,
+            });
+
+        if (pointsError) {
+            console.error('Failed to insert points log row:', pointsError.message);
+        }
         
         return newPoints;
     } catch (error) {
@@ -269,7 +283,7 @@ async function incrementProblemsSolved(memberId) {
             return false;
         }
 
-        const currentCount = member?.problem_solved || 0;
+        const currentCount = Number(member?.problem_solved || 0);
         const newCount = currentCount + 1;
 
         // Update problem_solved in members table
@@ -297,9 +311,9 @@ async function getAllPoints() {
     if (!dbAvailable) return [];
     try {
         const { data, error } = await supabase
-            .from('points')
-            .select('*, members(username, display_name)')
-            .order('points', { ascending: false });
+            .from('members')
+            .select('member_id, username, display_name, belmonts_points')
+            .order('belmonts_points', { ascending: false });
 
         if (error) console.error('Error fetching points:', error);
         return data || [];
@@ -313,22 +327,13 @@ async function setPoints(memberId, points) {
     if (!dbAvailable) return false;
     try {
         const id = parseInt(memberId, 10);
-        const { data: existing } = await supabase
-            .from('points')
-            .select('*')
-            .eq('member_id', id)
-            .single();
-
-        if (!existing) {
-            await initializePoints(memberId);
-        }
+        const timestamp = new Date().toISOString();
 
         const { error } = await supabase
-            .from('points')
+            .from('members')
             .update({
-                points,
-                last_update: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
+                belmonts_points: points,
+                updated_at: timestamp,
             })
             .eq('member_id', id);
 
@@ -359,25 +364,14 @@ async function getLeaderboard(limit = 100) {
             return [];
         }
 
-        // Get all points data
-        const { data: pointsData, error: pointsError } = await supabase
-            .from('points')
-            .select('*');
-
-        if (pointsError) {
-            console.error('Error fetching points:', pointsError);
-            return [];
-        }
-
         // Merge members with their points (default to 0 if no points)
         // Filter out excluded members
         const leaderboard = membersData
             .filter(member => !EXCLUDED_MEMBERS.includes(member.display_name) && !EXCLUDED_MEMBERS.includes(member.username))
             .map(member => {
-                const points = pointsData.find(p => p.member_id === member.member_id);
                 return {
                     member_id: member.member_id,
-                    points: points?.points || 0,
+                    points: member?.belmonts_points || 0,
                     members: member
                 };
             });

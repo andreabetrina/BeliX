@@ -65,9 +65,13 @@ function readDailyPointsLog() {
 
     try {
         const fileContent = fs.readFileSync(DAILY_POINTS_FILE, 'utf-8');
+        if (!fileContent.trim()) {
+            return { awards: {}, lastUpdated: null };
+        }
         return JSON.parse(fileContent);
     } catch (error) {
         console.error('Error reading daily points log:', error.message);
+        writeDailyPointsLog({ awards: {}, lastUpdated: null });
         return { awards: {}, lastUpdated: null };
     }
 }
