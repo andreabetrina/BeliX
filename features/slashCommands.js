@@ -20,7 +20,7 @@ function buildHelpEmbed() {
             { name: '/terminology', value: 'Show today\'s terminology.' },
             { name: '/next', value: 'Preview the next terminology (without changing today\'s).' },
             { name: '/prev', value: 'Preview the previous terminology.' },
-            { name: '/dailyquestions', value: 'Browse daily programming questions with pagination.' },
+            { name: '/dailyquestions', value: 'View today\'s daily programming question.' },
             { name: '/question <number>', value: 'View a specific question (1-129) with full details.' },
             { name: '/qd <difficulty>', value: 'Filter questions by difficulty level (Easy/Medium).' }
         )
@@ -92,10 +92,33 @@ function getPreviousTerminologyEmbed() {
         .setTimestamp();
 }
 
-function loadQuestions() {
+function loadQuestionsData() {
     const questionsPath = path.join(__dirname, '../json/dailyQuestion.json');
     const data = fs.readFileSync(questionsPath, 'utf-8');
     return JSON.parse(data);
+}
+
+function loadQuestions() {
+    const data = loadQuestionsData();
+    return data.Questions || data;
+}
+
+function getTodaysQuestion() {
+    const data = loadQuestionsData();
+    const questions = data.Questions || data;
+    const startDate = new Date(data.startDate);
+    const today = new Date();
+    
+    // Calculate days elapsed since start date
+    const timeDiff = today - startDate;
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    
+    // Get the current index (starting point) and add days elapsed
+    const currentDayNumber = data.currentIndex + daysDiff;
+    
+    // Find the question with matching Day number
+    const todayQuestion = questions.find(q => q.Day === currentDayNumber);
+    return todayQuestion || questions[0];
 }
 
 function buildQuestionsEmbed(questions, startIndex = 0, itemsPerPage = 5) {
@@ -255,7 +278,7 @@ function buildCommands() {
             .setDescription('Preview the previous terminology.'),
         new SlashCommandBuilder()
             .setName('dailyquestions')
-            .setDescription('Browse daily programming questions with solutions.'),
+            .setDescription('View today\'s daily programming question.'),
         new SlashCommandBuilder()
             .setName('question')
             .setDescription('Get a specific programming question by number (1-129).')
@@ -441,12 +464,17 @@ function handleSlashCommands(client) {
         }
 
         if (commandName === 'dailyquestions') {
-            const questions = loadQuestions();
-            const totalPages = Math.ceil(questions.length / 5);
-            const embed = buildQuestionsEmbed(questions, 0);
-            const buttons = getQuestionsNavigationButtons(1, totalPages);
-
-            return interaction.reply({ embeds: [embed], components: [buttons] });
+            const todayQuestion = getTodaysQuestion();
+            
+            if (!todayQuestion) {
+                return interaction.reply({
+                    content: '❌ No question available for today.',
+                    ephemeral: true
+                });
+            }
+            
+            const embed = buildQuestionDetailEmbed(todayQuestion);
+            return interaction.reply({ embeds: [embed] });
         }
 
         if (commandName === 'question') {
