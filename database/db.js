@@ -25,11 +25,17 @@ async function syncMember(member, guild) {
     if (!dbAvailable) return;
     try {
         const memberId = parseInt(member.id, 10);
-        const { data: existing } = await supabase
+        const { data: existing, error: fetchError } = await supabase
             .from('members')
             .select('*')
             .eq('member_id', memberId)
             .single();
+
+        // PGRST116 means no rows found, which is expected when member doesn't exist
+        if (fetchError && fetchError.code !== 'PGRST116') {
+            console.error('Error querying member:', fetchError);
+            return;
+        }
 
         const memberData = {
             member_id: memberId,
@@ -77,10 +83,54 @@ async function getMember(memberId) {
             .eq('member_id', id)
             .single();
 
-        if (error) console.error('Error fetching member:', error);
-        return data;
+        // PGRST116 means no rows found, which is expected when member doesn't exist
+        if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching member:', error);
+        }
+        return data || null;
     } catch (error) {
         console.error('Error getting member:', error);
+        return null;
+    }
+}
+
+async function getMemberByUsername(username) {
+    if (!dbAvailable) return null;
+    try {
+        const { data, error } = await supabase
+            .from('members')
+            .select('*')
+            .or(`username.eq.${username},discord_username.eq.${username}`)
+            .single();
+
+        // PGRST116 means no rows found
+        if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching member by username:', error);
+        }
+        return data || null;
+    } catch (error) {
+        console.error('Error getting member by username:', error);
+        return null;
+    }
+}
+
+async function getMemberByDiscordID(discordId) {
+    if (!dbAvailable) return null;
+    try {
+        const id = parseInt(discordId, 10);
+        const { data, error } = await supabase
+            .from('members')
+            .select('*')
+            .eq('members_discord_id', id)
+            .single();
+
+        // PGRST116 means no rows found
+        if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching member by discord ID:', error);
+        }
+        return data || null;
+    } catch (error) {
+        console.error('Error getting member by discord ID:', error);
         return null;
     }
 }
@@ -244,19 +294,19 @@ async function getPoints(memberId) {
     if (!dbAvailable) return 0;
     try {
         const id = parseInt(memberId, 10);
-        
-        // Get points from members table (belmonts_points)
+
+        // Get belmonts_points from members table
         const { data: member, error } = await supabase
             .from('members')
             .select('belmonts_points')
             .eq('member_id', id)
             .single();
 
-        if (error) {
-            console.error('Failed to fetch member:', error.message);
-            return 0;
+        // PGRST116 means no rows found
+        if (error && error.code !== 'PGRST116') {
+            console.error('Failed to fetch member points:', error.message);
         }
-        
+
         const points = member?.belmonts_points || 0;
         return points;
     } catch (error) {
@@ -985,6 +1035,8 @@ async function getMeetingStats() {
 module.exports = {
     syncMember,
     getMember,
+    getMemberByUsername,
+    getMemberByDiscordID,
     updateMemberBirthday,
     updateMemberRole,
     getAllMembers,

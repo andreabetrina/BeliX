@@ -8,30 +8,19 @@ const {
     TextInputStyle,
 } = require('discord.js');
 const { addPoints, initializePoints, createMeeting, updateMeetingEnd, recordAttendance } = require('../database/db');
-const { getDelayUntilNextScheduledTime } = require('../utils/timezoneUtils');
+const { getCurrentTimeInTimeZone, getDelayUntilNextScheduledTime, formatTimeInTimeZone } = require('../utils/timezoneUtils');
+const fs = require('fs');
+const path = require('path');
 
-const MEETING_VOICE_CHANNEL_ID = process.env.MEETING_VOICE_CHANNEL_ID || '1304848107095326830';
-const MEETING_TEXT_CHANNEL_ID = process.env.MEETING_TEXT_CHANNEL_ID || '1304848107095326831';
+const MEETING_VOICE_CHANNEL_ID = process.env['voiceroom-Common-hall'] || process.env.MEETING_VOICE_CHANNEL_ID || '1304848107095326830';
+const MEETING_PROMPT_CHANNEL_ID = process.env.tinkering || process.env.MEETING_PROMPT_CHANNEL_ID || '1304848107095326831';
+const MEETING_ANNOUNCE_CHANNEL_ID = process.env['common-hall'] || process.env.MEETING_ANNOUNCE_CHANNEL_ID || '1304848107095326831';
 const MEETING_PROMPT_HOUR = Number.parseInt(process.env.MEETING_PROMPT_HOUR || '18', 10);
-const MEETING_PROMPT_MINUTE = Number.parseInt(process.env.MEETING_PROMPT_MINUTE || '30', 10);
+const MEETING_PROMPT_MINUTE = Number.parseInt(process.env.MEETING_PROMPT_MINUTE || '0', 10);
 const MEETING_END_IDLE_MINUTES = Number.parseInt(process.env.MEETING_END_IDLE_MINUTES || '5', 10);
-
-const TRACKED_USERNAMES = [
-    'aadzmsa',
-    'amruthaab',
-    'andreabetrina',
-    'geonithin',
-    'sriiiharshiii',
-    'jesh04',
-    'maxwellrubert',
-    'michalnithesh',
-    'primsajun',
-    'samuel93601',
-    'sowmi2207',
-    'ancy03115',
-];
-
-const MEETING_MANAGERS = new Set(['geonithin', 'sriiiharshiii']);
+const ROOKIES_DATA = path.join(__dirname, '../json/rookiesData.json');
+const ROOKIE_ATTENDANCE_DATA = path.join(__dirname, '../json/rookiesAttendance.json');
+const ROOKIE_ROLE_NAME = (process.env.ROOKIE_ROLE_NAME || 'rookies').trim().toLowerCase();
 
 const guildStates = new Map();
 
@@ -40,7 +29,13 @@ function normalizeName(value) {
 }
 
 function formatTimeLabel(date) {
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+    const options = {
+        timeZone: 'Asia/Kolkata',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+    };
+    return date.toLocaleString('en-US', options);
 }
 
 function formatDuration(ms) {
@@ -49,12 +44,24 @@ function formatDuration(ms) {
 }
 
 function resolveTextChannel(guild) {
-    const byId = guild.channels.cache.get(MEETING_TEXT_CHANNEL_ID);
+    const byId = guild.channels.cache.get(MEETING_PROMPT_CHANNEL_ID);
     if (byId?.isTextBased()) return byId;
 
     return guild.channels.cache.find(channel =>
         channel.isTextBased() &&
-        ['clan-meeting-hall', 'common hall', 'common-hall'].some(name =>
+        ['tinkering', 'tinker', 'tinkering-room'].some(name =>
+            channel.name?.toLowerCase().includes(name)
+        )
+    );
+}
+
+function resolveAnnouncementChannel(guild) {
+    const byId = guild.channels.cache.get(MEETING_ANNOUNCE_CHANNEL_ID);
+    if (byId?.isTextBased()) return byId;
+
+    return guild.channels.cache.find(channel =>
+        channel.isTextBased() &&
+        ['common hall', 'common-hall', 'commonhall'].some(name =>
             channel.name?.toLowerCase().includes(name)
         )
     );
@@ -77,24 +84,146 @@ async function resolveTrackedMembers(guild) {
     const trackedMap = new Map();
 
     for (const member of members.values()) {
-        const username = normalizeName(member.user.username);
-        const displayName = normalizeName(member.displayName);
-
-        if (TRACKED_USERNAMES.includes(username) || TRACKED_USERNAMES.includes(displayName)) {
-            trackedMap.set(member.user.id, member);
-        }
+        if (member.user.bot) continue;
+        trackedMap.set(member.user.id, member);
     }
 
     return trackedMap;
 }
 
-function isMeetingManager(member) {
-    const username = normalizeName(member.user.username);
-    const displayName = normalizeName(member.displayName);
-    return MEETING_MANAGERS.has(username) || MEETING_MANAGERS.has(displayName);
+function loadRookiesData() {
+    if (!fs.existsSync(ROOKIES_DATA)) {
+        return { rookiesmembersData: [], lastUpdated: null };
+    }
+
+    try {
+        const fileContent = fs.readFileSync(ROOKIES_DATA, 'utf-8');
+        if (!fileContent.trim()) {
+            return { rookiesmembersData: [], lastUpdated: null };
+        }
+        return JSON.parse(fileContent);
+    } catch (error) {
+        console.error('Error reading rookies data:', error.message);
+        return { rookiesmembersData: [], lastUpdated: null };
+    }
 }
 
-function parseTimeInput(input, now = new Date()) {
+function saveRookiesData(data) {
+    try {
+        fs.writeFileSync(ROOKIES_DATA, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('Error writing rookies data:', error.message);
+    }
+}
+
+function loadRookieAttendance() {
+    if (!fs.existsSync(ROOKIE_ATTENDANCE_DATA)) {
+        return { records: [], lastUpdated: null };
+    }
+
+    try {
+        const fileContent = fs.readFileSync(ROOKIE_ATTENDANCE_DATA, 'utf-8');
+        if (!fileContent.trim()) {
+            return { records: [], lastUpdated: null };
+        }
+        return JSON.parse(fileContent);
+    } catch (error) {
+        console.error('Error reading rookies attendance data:', error.message);
+        return { records: [], lastUpdated: null };
+    }
+}
+
+function saveRookieAttendance(data) {
+    try {
+        fs.writeFileSync(ROOKIE_ATTENDANCE_DATA, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('Error writing rookies attendance data:', error.message);
+    }
+}
+
+function recordRookieAttendance({
+    member,
+    attendedMs,
+    attendancePercentage,
+    meetingId,
+    meetingDate,
+    scheduledLabel,
+    voiceChannelId,
+}) {
+    const data = loadRookieAttendance();
+    const nowIso = new Date().toISOString();
+
+    data.records.push({
+        meetingId,
+        meetingDate,
+        scheduledLabel,
+        voiceChannelId,
+        userId: member.user.id,
+        username: member.user.username,
+        displayName: member.displayName || member.user.username,
+        totalDurationMinutes: Math.round(attendedMs / 60000),
+        attendancePercentage: parseFloat(attendancePercentage.toFixed(2)),
+        createdAt: nowIso,
+    });
+
+    data.lastUpdated = nowIso;
+    saveRookieAttendance(data);
+}
+
+function upsertRookieEntry(data, { username, userId }) {
+    const existingEntry = data.rookiesmembersData.find(m => m.userId === userId || m.username === username);
+    const timestamp = new Date().toISOString();
+
+    if (existingEntry) {
+        existingEntry.username = existingEntry.username || username;
+        existingEntry.userId = existingEntry.userId || userId;
+        existingEntry.lastSeen = timestamp;
+        return existingEntry;
+    }
+
+    const entry = {
+        username,
+        userId,
+        firstSeen: timestamp,
+        lastSeen: timestamp,
+        points: 0,
+        lastAwardedDate: null,
+        lastAwardedAt: null,
+    };
+
+    data.rookiesmembersData.push(entry);
+    return entry;
+}
+
+function isRookieMember(member) {
+    const hasRole = member.roles.cache.some(role => normalizeName(role.name) === ROOKIE_ROLE_NAME);
+    if (hasRole) return true;
+
+    const data = loadRookiesData();
+    return data.rookiesmembersData.some(m => m.userId === member.user.id || m.username === member.user.username);
+}
+
+function awardRookiePoints(member, pointsToAward, awardDateKey) {
+    const data = loadRookiesData();
+    const entry = upsertRookieEntry(data, {
+        username: member.user.username,
+        userId: member.user.id,
+    });
+
+    if (entry.lastAwardedDate === awardDateKey) {
+        return { updated: false, points: entry.points || 0 };
+    }
+
+    entry.points = (entry.points || 0) + pointsToAward;
+    entry.lastAwardedDate = awardDateKey;
+    entry.lastAwardedAt = new Date().toISOString();
+    data.lastUpdated = entry.lastAwardedAt;
+    saveRookiesData(data);
+
+    return { updated: true, points: entry.points };
+}
+
+function parseTimeInput(input, now = getCurrentTimeInTimeZone()) {
     const trimmed = normalizeName(input);
     const match = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
     if (!match) return null;
@@ -113,15 +242,47 @@ function parseTimeInput(input, now = new Date()) {
         return null;
     }
 
-    const scheduled = new Date(now);
+    // Create a date in Asia/Kolkata timezone
+    // Get current system time
+    const systemNow = new Date();
+    const kolkataDate = new Date(now);
+    
+    // Calculate the offset between system time and Kolkata time
+    const offset = systemNow.getTime() - kolkataDate.getTime();
+    
+    // Create a new date with the target time in Kolkata timezone
+    const scheduled = new Date(kolkataDate);
     scheduled.setHours(hour, minute, 0, 0);
+    
+    // Adjust to system time by applying the offset
+    scheduled.setTime(scheduled.getTime() + offset);
+    
     return scheduled;
+}
+
+async function respondEphemeral(interaction, content) {
+    try {
+        // Always use editReply if we've deferred, otherwise use reply
+        if (interaction.deferred || interaction.replied) {
+            return await interaction.editReply({ content, flags: 64 });
+        }
+        // Fallback to reply if not deferred/replied yet
+        return await interaction.reply({ content, flags: 64 });
+    } catch (error) {
+        // If error occurs, try followUp as last resort
+        try {
+            if (!error.message.includes('already been acknowledged')) {
+                return await interaction.followUp({ content, flags: 64 });
+            }
+        } catch (followUpError) {
+            console.error('Error responding to interaction:', error.message);
+        }
+    }
 }
 
 function buildTimeButtons() {
     const times = [
         { label: '7:00 PM', value: '19:00' },
-        { label: '7:15 PM', value: '19:15' },
         { label: '7:30 PM', value: '19:30' },
         { label: '8:00 PM', value: '20:00' },
         { label: '8:30 PM', value: '20:30' },
@@ -147,13 +308,13 @@ function buildTimeButtons() {
     return [row, manualRow];
 }
 
-function buildMeetingPromptEmbed(guild, managerMentions) {
+function buildMeetingPromptEmbed(guild) {
     return new EmbedBuilder()
         .setColor('#7f56d9')
         .setTitle('📅 Clan Gathering Meeting Time')
         .setDescription(
-            `Hi ${managerMentions}! Please choose the meeting time for today.\n` +
-            'Options: 7:00 PM, 7:15 PM, 7:30 PM, 8:00 PM, 8:30 PM, or enter a manual time.'
+            'Please choose the meeting time for today.\n' +
+            'Options: 7:00 PM, 7:30 PM, 8:00 PM, 8:30 PM, or enter a manual time.'
         )
         .setFooter({ text: `Server: ${guild.name}` })
         .setTimestamp();
@@ -186,9 +347,30 @@ function getOrCreateState(guildId) {
             participants: new Map(),
             trackedMembers: new Map(),
             voiceChannelId: null,
+            promptMessageId: null,
+            isScheduled: false,
         });
     }
     return guildStates.get(guildId);
+}
+
+function buildScheduledMessageComponents() {
+    const editRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId('meeting_edit_time')
+            .setLabel('Edit Time')
+            .setStyle(ButtonStyle.Secondary)
+    );
+    return [editRow];
+}
+
+function buildScheduledMessageEmbed(scheduledLabel, guild) {
+    return new EmbedBuilder()
+        .setColor('#12b76a')
+        .setTitle('✅ Meeting Scheduled')
+        .setDescription(`Daily Gathering scheduled for **${scheduledLabel}**.`)
+        .setFooter({ text: `Server: ${guild.name}` })
+        .setTimestamp();
 }
 
 function scheduleDailyPrompt(client, guild) {
@@ -215,19 +397,16 @@ async function sendMeetingPrompt(client, guild) {
         return;
     }
 
-    const trackedMembers = await resolveTrackedMembers(guild);
-    const managerMentions = Array.from(trackedMembers.values())
-        .filter(member => isMeetingManager(member))
-        .map(member => `<@${member.user.id}>`)
-        .join(' ');
-
-    const embed = buildMeetingPromptEmbed(guild, managerMentions || 'Geo / Harshini');
+    const embed = buildMeetingPromptEmbed(guild);
     const components = buildTimeButtons();
 
-    await channel.send({ embeds: [embed], components });
+    const msg = await channel.send({ embeds: [embed], components });
+    const state = getOrCreateState(guild.id);
+    state.promptMessageId = msg.id;
+    state.isScheduled = false;
 }
 
-function scheduleMeetingStart(guild, scheduledAt) {
+async function scheduleMeetingStart(guild, scheduledAt) {
     const state = getOrCreateState(guild.id);
 
     if (state.startTimeout) {
@@ -236,9 +415,44 @@ function scheduleMeetingStart(guild, scheduledAt) {
 
     state.scheduledAt = scheduledAt;
     state.scheduledLabel = formatTimeLabel(scheduledAt);
+    state.isScheduled = true;
 
-    const delay = scheduledAt.getTime() - Date.now();
-    state.startTimeout = setTimeout(() => startMeeting(guild), Math.max(0, delay));
+    if (!state.meetingId) {
+        const dateStr = scheduledAt.toISOString().split('T')[0];
+        const timeStr = scheduledAt.toTimeString().slice(0, 5);
+        const trackedMembers = await resolveTrackedMembers(guild);
+        const meetingRecord = await createMeeting({
+            title: `Daily Gathering - ${dateStr}`,
+            meeting_date: dateStr,
+            meeting_time: timeStr,
+            scheduled_time: timeStr,
+            total_members: trackedMembers.size,
+        });
+
+        state.meetingId = meetingRecord?.meeting_id || null;
+    }
+
+    if (state.promptMessageId) {
+        const channel = resolveTextChannel(guild);
+        if (channel) {
+            try {
+                const msg = await channel.messages.fetch(state.promptMessageId);
+                const embed = buildScheduledMessageEmbed(state.scheduledLabel, guild);
+                const components = buildScheduledMessageComponents();
+                await msg.edit({ embeds: [embed], components });
+            } catch (error) {
+                console.error('Error updating prompt message:', error.message);
+            }
+        }
+    }
+
+    const announceChannel = resolveAnnouncementChannel(guild);
+    if (announceChannel) {
+        await announceChannel.send(`📣 Daily Gathering scheduled at **${state.scheduledLabel}**.`);
+    }
+
+    const delay = getDelayUntilNextScheduledTime(scheduledAt.getHours(), scheduledAt.getMinutes());
+    state.startTimeout = setTimeout(() => startMeeting(guild), delay);
 }
 
 async function startMeeting(guild) {
@@ -258,20 +472,21 @@ async function startMeeting(guild) {
     state.participants = new Map();
     state.trackedMembers = await resolveTrackedMembers(guild);
 
-    // Create meeting record in database
-    const meetingDate = new Date(state.startAt);
-    const dateStr = meetingDate.toISOString().split('T')[0];
-    const timeStr = meetingDate.toTimeString().slice(0, 5);
-    
-    const meetingRecord = await createMeeting({
-        title: `Daily Gathering - ${dateStr}`,
-        meeting_date: dateStr,
-        meeting_time: timeStr,
-        scheduled_time: state.scheduledLabel || timeStr,
-        total_members: state.trackedMembers.size,
-    });
+    if (!state.meetingId) {
+        const meetingDate = new Date(state.startAt);
+        const dateStr = meetingDate.toISOString().split('T')[0];
+        const timeStr = meetingDate.toTimeString().slice(0, 5);
 
-    state.meetingId = meetingRecord?.meeting_id || null;
+        const meetingRecord = await createMeeting({
+            title: `Daily Gathering - ${dateStr}`,
+            meeting_date: dateStr,
+            meeting_time: timeStr,
+            scheduled_time: state.scheduledLabel || timeStr,
+            total_members: state.trackedMembers.size,
+        });
+
+        state.meetingId = meetingRecord?.meeting_id || null;
+    }
 
     const now = Date.now();
     for (const member of voiceChannel.members.values()) {
@@ -280,7 +495,7 @@ async function startMeeting(guild) {
         }
     }
 
-    const channel = resolveTextChannel(guild);
+    const channel = resolveAnnouncementChannel(guild);
     if (channel) {
         await channel.send(`🔔 Meeting started in **${voiceChannel.name}**. Attendance is now being tracked.`);
     }
@@ -317,28 +532,43 @@ async function endMeeting(guild) {
         const percentage = durationMs > 0 ? (attendedMs / durationMs) * 100 : 0;
         const percentageLabel = `${percentage.toFixed(0)}%`;
         const nameLabel = member.displayName || member.user.username;
+        const rookie = isRookieMember(member);
 
         attendanceLines.push(`• **${nameLabel}** — ${percentageLabel} (${formatDuration(attendedMs)})`);
 
         let pointsAwarded = 0;
         if (percentage > 50) {
-            await initializePoints(userId);
-            await addPoints(userId, 5);
-            pointsAwarded = 5;
-            attendedCount++;
+            if (!rookie) {
+                await initializePoints(userId);
+                await addPoints(userId, 5);
+                pointsAwarded = 5;
+                attendedCount++;
+            }
         }
 
-        // Record attendance in database
-        attendanceRecords.push({
-            meeting_id: state.meetingId,
-            member_id: userId,
-            username: member.user.username,
-            display_name: nameLabel,
-            total_duration_minutes: Math.round(attendedMs / 60000),
-            attendance_percentage: parseFloat(percentage.toFixed(2)),
-            points_awarded: pointsAwarded,
-            created_at: new Date().toISOString(),
-        });
+        if (!rookie) {
+            // Record attendance in database
+            attendanceRecords.push({
+                meeting_id: state.meetingId,
+                member_id: userId,
+                username: member.user.username,
+                display_name: nameLabel,
+                total_duration_minutes: Math.round(attendedMs / 60000),
+                attendance_percentage: parseFloat(percentage.toFixed(2)),
+                points_awarded: pointsAwarded,
+                created_at: new Date().toISOString(),
+            });
+        } else {
+            recordRookieAttendance({
+                member,
+                attendedMs,
+                attendancePercentage: percentage,
+                meetingId: state.meetingId,
+                meetingDate: new Date(state.startAt).toISOString().split('T')[0],
+                scheduledLabel: state.scheduledLabel || 'N/A',
+                voiceChannelId: state.voiceChannelId,
+            });
+        }
     }
 
     // Save meeting to database
@@ -362,7 +592,7 @@ async function endMeeting(guild) {
         attendanceLines: attendanceLines.join('\n'),
     });
 
-    const channel = resolveTextChannel(guild);
+    const channel = resolveAnnouncementChannel(guild);
     if (channel) {
         await channel.send({ embeds: [reportEmbed] });
     }
@@ -425,18 +655,51 @@ function handleVoiceStateUpdate(oldState, newState) {
 function handleMeetingInteractions(client) {
     client.on('interactionCreate', async interaction => {
         if (!interaction.isButton() && !interaction.isModalSubmit()) return;
+        
+        if (!interaction.customId?.startsWith('meeting_')) return;
 
         const guild = interaction.guild;
         if (!guild) return;
 
         const state = getOrCreateState(guild.id);
 
-        if (interaction.isButton()) {
-            if (!interaction.customId.startsWith('meeting_time_')) return;
+        let wasDeferred = false;
+        try {
+            if (interaction.isButton() && (interaction.customId === 'meeting_edit_time' || interaction.customId === 'meeting_time_manual')) {
+                // Don't defer for modal interactions - showModal() acknowledges the interaction
+            } else if ((interaction.isButton() || interaction.isModalSubmit()) && interaction.customId?.startsWith('meeting_')) {
+                // Defer for meeting interactions (except modal triggers)
+                if (!interaction.deferred && !interaction.replied) {
+                    await interaction.deferReply({ flags: 64 });
+                    wasDeferred = true;
+                }
+            }
+        } catch (error) {
+            if (!error.message.includes('already been acknowledged')) {
+                console.error('Error deferring interaction:', error.message);
+            }
+        }
 
-            const member = interaction.member;
-            if (!member || !isMeetingManager(member)) {
-                return interaction.reply({ content: 'Only Geo or Harshini can set the meeting time.', ephemeral: true });
+        if (interaction.isButton()) {
+            if (!interaction.customId.startsWith('meeting_time_') && interaction.customId !== 'meeting_edit_time') return;
+
+            if (interaction.customId === 'meeting_edit_time') {
+                const modal = new ModalBuilder()
+                    .setCustomId('meeting_edit_time_modal')
+                    .setTitle('Edit Meeting Time');
+
+                const input = new TextInputBuilder()
+                    .setCustomId('meeting_edit_time_input')
+                    .setLabel('New time (e.g. 7:45 PM or 19:45)')
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                modal.addComponents(new ActionRowBuilder().addComponents(input));
+                try {
+                    return interaction.showModal(modal);
+                } catch (error) {
+                    console.error('Error showing edit modal:', error.message);
+                }
             }
 
             if (interaction.customId === 'meeting_time_manual') {
@@ -451,45 +714,82 @@ function handleMeetingInteractions(client) {
                     .setRequired(true);
 
                 modal.addComponents(new ActionRowBuilder().addComponents(input));
-                return interaction.showModal(modal);
+                try {
+                    return interaction.showModal(modal);
+                } catch (error) {
+                    console.error('Error showing time modal:', error.message);
+                }
             }
 
-            const timeValue = interaction.customId.replace('meeting_time_', '');
-            const scheduledAt = parseTimeInput(timeValue, new Date());
+            try {
+                const timeValue = interaction.customId.replace('meeting_time_', '');
+                const now = getCurrentTimeInTimeZone();
+                const scheduledAt = parseTimeInput(timeValue, now);
 
-            if (!scheduledAt) {
-                return interaction.reply({ content: 'Could not parse that meeting time.', ephemeral: true });
+                if (!scheduledAt) {
+                    return respondEphemeral(interaction, 'Could not parse that meeting time.');
+                }
+
+                if (scheduledAt <= now) {
+                    return respondEphemeral(interaction, 'Please choose a future time for today\'s meeting.');
+                }
+
+                await scheduleMeetingStart(guild, scheduledAt);
+                return respondEphemeral(interaction, `Meeting scheduled for ${formatTimeLabel(scheduledAt)}.`);
+            } catch (error) {
+                console.error('Error handling time button:', error);
+                try {
+                    return respondEphemeral(interaction, 'An error occurred while scheduling the meeting.');
+                } catch (e) {
+                    console.error('Failed to send error message:', e.message);
+                }
             }
-
-            if (scheduledAt <= new Date()) {
-                return interaction.reply({ content: 'Please choose a future time for today’s meeting.', ephemeral: true });
-            }
-
-            scheduleMeetingStart(guild, scheduledAt);
-            return interaction.reply({ content: `Meeting scheduled for ${formatTimeLabel(scheduledAt)}.`, ephemeral: true });
         }
 
         if (interaction.isModalSubmit() && interaction.customId === 'meeting_time_modal') {
-            const member = interaction.member;
-            if (!member || !isMeetingManager(member)) {
-                return interaction.reply({ content: 'Only Geo or Harshini can set the meeting time.', ephemeral: true });
-            }
-
             const input = interaction.fields.getTextInputValue('meeting_time_input');
-            const scheduledAt = parseTimeInput(input, new Date());
+            const now = getCurrentTimeInTimeZone();
+            const scheduledAt = parseTimeInput(input, now);
 
             if (!scheduledAt) {
-                return interaction.reply({ content: 'Please enter a valid time like 7:30 PM or 19:30.', ephemeral: true });
+                return respondEphemeral(interaction, 'Please enter a valid time like 7:30 PM or 19:30.');
             }
 
-            if (scheduledAt <= new Date()) {
-                return interaction.reply({ content: 'Please enter a future time for today’s meeting.', ephemeral: true });
+            if (scheduledAt <= now) {
+                return respondEphemeral(interaction, 'Please enter a future time for today’s meeting.');
             }
 
-            scheduleMeetingStart(guild, scheduledAt);
-            return interaction.reply({ content: `Meeting scheduled for ${formatTimeLabel(scheduledAt)}.`, ephemeral: true });
+            await scheduleMeetingStart(guild, scheduledAt);
+            return respondEphemeral(interaction, `Meeting scheduled for ${formatTimeLabel(scheduledAt)}.`);
         }
-    });
+        if (interaction.isModalSubmit() && interaction.customId === 'meeting_edit_time_modal') {
+            const input = interaction.fields.getTextInputValue('meeting_edit_time_input');
+            const now = getCurrentTimeInTimeZone();
+            const scheduledAt = parseTimeInput(input, now);
+
+            if (!scheduledAt) {
+                return respondEphemeral(interaction, 'Please enter a valid time like 7:30 PM or 19:30.');
+            }
+
+            if (scheduledAt <= now) {
+                return respondEphemeral(interaction, 'Please enter a future time for today\'s meeting.');
+            }
+
+            const state = getOrCreateState(guild.id);
+            if (state.startTimeout) {
+                clearTimeout(state.startTimeout);
+                state.startTimeout = null;
+            }
+
+            await scheduleMeetingStart(guild, scheduledAt);
+
+            const announceChannel = resolveAnnouncementChannel(guild);
+            if (announceChannel) {
+                await announceChannel.send(`📢 Daily Gathering time updated to **${formatTimeLabel(scheduledAt)}**.`);
+            }
+
+            return respondEphemeral(interaction, `Meeting time updated to ${formatTimeLabel(scheduledAt)}.`);
+        }    });
 }
 
 function handleMeetingTracker(client) {

@@ -2,7 +2,8 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const { confirmGathering, cancelGathering, getGatheringStatus } = require('../database/db');
 const { getDelayUntilNextScheduledTime, getCurrentTimeInTimeZone } = require('../utils/timezoneUtils');
 
-const GATHERING_MANAGERS = new Set(['geonithin', 'sriiiharshiii', 'michalnithesh']);
+// Removed manager restriction - anyone can confirm gathering
+// const GATHERING_MANAGERS = new Set(['geonithin', 'sriiiharshiii', 'michalnithesh']);
 const GATHERING_PROMPT_HOUR = 18; // 6:00 PM
 const GATHERING_PROMPT_MINUTE = 0;
 
@@ -10,12 +11,13 @@ function normalizeName(value) {
     return (value || '').toLowerCase().trim();
 }
 
-function isGatheringManager(member) {
-    if (!member) return false;
-    const username = normalizeName(member.user.username);
-    const displayName = normalizeName(member.displayName);
-    return GATHERING_MANAGERS.has(username) || GATHERING_MANAGERS.has(displayName);
-}
+// Removed manager restriction - anyone can confirm gathering
+// function isGatheringManager(member) {
+//     if (!member) return false;
+//     const username = normalizeName(member.user.username);
+//     const displayName = normalizeName(member.displayName);
+//     return GATHERING_MANAGERS.has(username) || GATHERING_MANAGERS.has(displayName);
+// }
 
 function findTinkeringChannel(guild) {
     const channelId = process.env.tinkering;
@@ -52,7 +54,7 @@ function buildGatheringPromptEmbed() {
             { name: 'Location', value: '📡 tinkering channel', inline: true },
             { name: 'Time', value: '6:00 PM', inline: true }
         )
-        .setFooter({ text: 'Only Geo, Harshini, and Michal can confirm' })
+        .setFooter({ text: 'Anyone can confirm or cancel the gathering' })
         .setTimestamp();
 }
 
@@ -127,46 +129,40 @@ async function sendGatheringPrompt(client, guild) {
 function handleGatheringConfirmation(client) {
     client.on('interactionCreate', async (interaction) => {
         if (!interaction.isButton()) return;
+        
+        // Only handle gather_confirm and gather_cancel buttons
+        if (interaction.customId !== 'gather_confirm' && interaction.customId !== 'gather_cancel') return;
 
-        if (interaction.customId === 'gather_confirm' || interaction.customId === 'gather_cancel') {
-            // Check if user is a gathering manager
-            if (!isGatheringManager(interaction.member)) {
-                await interaction.reply({
-                    content: '❌ Only Geo and Harshini can confirm or cancel gatherings!',
-                    ephemeral: true,
-                });
-                return;
+        // Removed manager restriction - anyone can confirm gathering
+
+        const guild = interaction.guild;
+        const today = new Date();
+        const memberId = parseInt(interaction.user.id, 10);
+
+        if (interaction.customId === 'gather_confirm') {
+            // Store confirmation in database
+            await confirmGathering(memberId, interaction.user.username, today);
+
+            // Send confirmation to common-hall
+            const commonHall = findCommonHallChannel(guild);
+            if (commonHall) {
+                const embed = buildConfirmationEmbed(interaction.user.username);
+                await commonHall.send({ embeds: [embed] });
             }
 
-            const guild = interaction.guild;
-            const today = new Date();
-            const memberId = parseInt(interaction.user.id, 10);
+            // Acknowledge in tinkering channel
+            await interaction.reply({
+                content: '✅ Gathering confirmed! Message sent to 🗻 common-hall',
+                ephemeral: true,
+            });
+        } else if (interaction.customId === 'gather_cancel') {
+            // Cancel gathering in database
+            await cancelGathering(today);
 
-            if (interaction.customId === 'gather_confirm') {
-                // Store confirmation in database
-                await confirmGathering(memberId, interaction.user.username, today);
-
-                // Send confirmation to common-hall
-                const commonHall = findCommonHallChannel(guild);
-                if (commonHall) {
-                    const embed = buildConfirmationEmbed(interaction.user.username);
-                    await commonHall.send({ embeds: [embed] });
-                }
-
-                // Acknowledge in tinkering channel
-                await interaction.reply({
-                    content: '✅ Gathering confirmed! Message sent to 🗻 common-hall',
-                    ephemeral: true,
-                });
-            } else if (interaction.customId === 'gather_cancel') {
-                // Cancel gathering in database
-                await cancelGathering(today);
-
-                await interaction.reply({
-                    content: '❌ Gathering cancelled for today.',
-                    ephemeral: true,
-                });
-            }
+            await interaction.reply({
+                content: '❌ Gathering cancelled for today.',
+                ephemeral: true,
+            });
         }
     });
 }

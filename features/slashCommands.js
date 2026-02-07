@@ -1,9 +1,58 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { buildLeaderboardEmbed, getLeaderboardButtons, buildMyPointsEmbed } = require('./leaderboard');
 const { loadTerminologies, postDailyTerminology } = require('./dailyTerminology');
-const { getLeaderboard, getMember, getPoints, initializePoints, syncMember } = require('../database/db');
+const { getLeaderboard, getMember, getMemberByUsername, getMemberByDiscordID, getPoints, initializePoints, syncMember } = require('../database/db');
 const fs = require('fs');
 const path = require('path');
+
+// Helper functions for rookie data
+const ROOKIES_DATA_PATH = path.join(__dirname, '../json/rookiesData.json');
+const ROOKIE_ROLE_NAME = (process.env.ROOKIE_ROLE_NAME || 'rookies').trim().toLowerCase();
+
+function normalizeRoleName(name) {
+    return String(name || '').trim().toLowerCase();
+}
+
+function loadRookiesData() {
+    if (!fs.existsSync(ROOKIES_DATA_PATH)) {
+        return { rookiesmembersData: [], lastUpdated: null };
+    }
+    try {
+        const fileContent = fs.readFileSync(ROOKIES_DATA_PATH, 'utf-8');
+        if (!fileContent.trim()) {
+            return { rookiesmembersData: [], lastUpdated: null };
+        }
+        return JSON.parse(fileContent);
+    } catch (error) {
+        console.error('Error reading rookies data:', error.message);
+        return { rookiesmembersData: [], lastUpdated: null };
+    }
+}
+
+async function isRookieMember(guild, userId, username) {
+    if (guild) {
+        try {
+            const member = await guild.members.fetch(userId);
+            if (member) {
+                const hasRole = member.roles.cache.some((role) => normalizeRoleName(role.name) === ROOKIE_ROLE_NAME);
+                if (hasRole) return true;
+            }
+        } catch (error) {
+            console.error('Error checking rookie role:', error.message);
+        }
+    }
+    const data = loadRookiesData();
+    return data.rookiesmembersData.some(m => m.userId === userId || m.username === username);
+}
+
+function getRookiePoints(userId, username) {
+    const data = loadRookiesData();
+    const rookie = data.rookiesmembersData.find(m => m.userId === userId || m.username === username);
+    return {
+        points: rookie?.points || 0,
+        lastUpdate: rookie?.lastAwardedAt || null
+    };
+}
 
 // Cache for guild members to avoid rate limiting
 const memberCache = new Map();
@@ -423,14 +472,55 @@ function handleSlashCommands(client) {
         }
 
         if (commandName === 'mypoints') {
-            // Ensure member exists in database first
-            await syncMember(interaction.member, interaction.guild);
-            await initializePoints(interaction.user.id);
-            const memberData = await getMember(interaction.user.id);
-            const pointsData = await getPoints(interaction.user.id);
+            const userId = interaction.user.id;
+            const username = interaction.user.username;
+            const displayName = interaction.member?.displayName || username;
 
-            const embed = buildMyPointsEmbed(memberData, { points: pointsData, last_update: new Date().toISOString() });
-            return interaction.reply({ embeds: [embed] });
+            // Check if user is a rookie
+            const isRookie = await isRookieMember(interaction.guild, userId, username);
+
+            if (isRookie) {
+                // Rookies don't see points
+                const embed = new EmbedBuilder()
+                    .setColor('#ffa500')
+                    .setTitle('🎯 Rookie Member')
+                    .setDescription(`Hey ${displayName}! As a rookie member, your progress is being tracked separately. Keep learning and solving problems! 🚀`)
+                    .setFooter({ text: 'Focus on learning and growth!' })
+                    .setTimestamp();
+                return interaction.reply({ embeds: [embed] });
+            } else {
+                // Get member data from database using Discord ID (members_discord_id)
+                let memberData = await getMemberByDiscordID(userId);
+                
+                // Fallback: try to find by username if Discord ID lookup fails
+                if (!memberData) {
+                    memberData = await getMemberByUsername(username);
+                }
+                
+                // Fallback: try to find by member_id if all else fails
+                if (!memberData) {
+                    memberData = await getMember(userId);
+                }
+                
+                if (!memberData) {
+                    // User not found in database
+                    const notFoundEmbed = new EmbedBuilder()
+                        .setColor('#ff0000')
+                        .setTitle('❌ Member Not Found')
+                        .setDescription(`Sorry ${displayName}, you are not found in the members database. Please contact an admin to add you.`)
+                        .setTimestamp();
+                    return interaction.reply({ embeds: [notFoundEmbed] });
+                }
+                
+                // Get points for existing user
+                const pointsData = await getPoints(memberData.member_id);
+
+                const embed = buildMyPointsEmbed(memberData, { 
+                    points: pointsData, 
+                    last_update: new Date().toISOString() 
+                });
+                return interaction.reply({ embeds: [embed] });
+            }
         }
 
         if (commandName === 'terminology') {

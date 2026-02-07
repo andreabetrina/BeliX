@@ -7,46 +7,111 @@ const VIBE_CODING_CHANNEL_ID = '1362052133570220123';
 const MOTIVATION_MESSAGE = '💪 Keep going! Errors are part of learning. Fix it and try again!';
 const ROOKIES_DATA = path.join(__dirname, '../json/rookiesData.json');
 const DAILY_POINTS_FILE = path.join(__dirname, '../json/dailyPoints.json');
+const ROOKIE_ROLE_NAME = (process.env.ROOKIE_ROLE_NAME || 'rookies').trim().toLowerCase();
 
 // Helper function to log unfound members to JSON file
+function normalizeRoleName(name) {
+    return String(name || '').trim().toLowerCase();
+}
+
+function loadRookiesData() {
+    if (!fs.existsSync(ROOKIES_DATA)) {
+        return { rookiesmembersData: [], lastUpdated: null };
+    }
+
+    try {
+        const fileContent = fs.readFileSync(ROOKIES_DATA, 'utf-8');
+        if (!fileContent.trim()) {
+            return { rookiesmembersData: [], lastUpdated: null };
+        }
+        return JSON.parse(fileContent);
+    } catch (error) {
+        console.error('Error reading rookies data:', error.message);
+        return { rookiesmembersData: [], lastUpdated: null };
+    }
+}
+
+function saveRookiesData(data) {
+    try {
+        fs.writeFileSync(ROOKIES_DATA, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('Error writing rookies data:', error.message);
+    }
+}
+
+function upsertRookieEntry(data, { username, userId, channel }) {
+    const existingEntry = data.rookiesmembersData.find(m => m.userId === userId || m.username === username);
+    const timestamp = new Date().toISOString();
+
+    if (existingEntry) {
+        existingEntry.username = existingEntry.username || username;
+        existingEntry.userId = existingEntry.userId || userId;
+        existingEntry.channel = channel || existingEntry.channel || null;
+        existingEntry.count = (existingEntry.count || 1) + 1;
+        existingEntry.lastSeen = timestamp;
+        return existingEntry;
+    }
+
+    const entry = {
+        username,
+        userId,
+        channel,
+        firstSeen: timestamp,
+        lastSeen: timestamp,
+        count: 1,
+        points: 0,
+        lastAwardedDate: null,
+        lastAwardedAt: null,
+    };
+
+    data.rookiesmembersData.push(entry);
+    return entry;
+}
+
 async function rookiesData(username, userId, channel) {
     try {
-        let data = { rookiesmembersData: [], lastUpdated: null };
-        
-        // Read existing file if it exists
-        if (fs.existsSync(ROOKIES_DATA)) {
-            const fileContent = fs.readFileSync(ROOKIES_DATA, 'utf-8');
-            data = JSON.parse(fileContent);
-        }
-
-        // Check if member already exists in the list
-        const existingEntry = data.rookiesmembersData.find(m => m.username === username);
-        
+        const data = loadRookiesData();
         const timestamp = new Date().toISOString();
-        
-        if (existingEntry) {
-            // Update count and last seen
-            existingEntry.count = (existingEntry.count || 1) + 1;
-            existingEntry.lastSeen = timestamp;
-        } else {
-            // Add new entry
-            data.rookiesmembersData.push({
-                username,
-                userId,
-                channel,
-                firstSeen: timestamp,
-                lastSeen: timestamp,
-                count: 1,
-            });
-        }
-
+        upsertRookieEntry(data, { username, userId, channel });
         data.lastUpdated = timestamp;
-
-        // Write back to file
-        fs.writeFileSync(ROOKIES_DATA, JSON.stringify(data, null, 2));
+        saveRookiesData(data);
     } catch (error) {
         console.error('Error logging unfound member:', error.message);
     }
+}
+
+async function isRookieMember(guild, userId, username) {
+    if (guild) {
+        try {
+            const member = await guild.members.fetch(userId);
+            if (member) {
+                const hasRole = member.roles.cache.some((role) => normalizeRoleName(role.name) === ROOKIE_ROLE_NAME);
+                if (hasRole) return true;
+            }
+        } catch (error) {
+            console.error('Error checking rookie role:', error.message);
+        }
+    }
+
+    const data = loadRookiesData();
+    return data.rookiesmembersData.some(m => m.userId === userId || m.username === username);
+}
+
+function updateRookiePoints({ username, userId, channel, pointsToAward, todayKey }) {
+    const data = loadRookiesData();
+    const entry = upsertRookieEntry(data, { username, userId, channel });
+
+    if (entry.lastAwardedDate === todayKey) {
+        return { updated: false, points: entry.points || 0 };
+    }
+
+    entry.points = (entry.points || 0) + pointsToAward;
+    entry.lastAwardedDate = todayKey;
+    entry.lastAwardedAt = new Date().toISOString();
+    data.lastUpdated = entry.lastAwardedAt;
+    saveRookiesData(data);
+
+    return { updated: true, points: entry.points };
 }
 
 function getTodayKey() {
@@ -124,12 +189,34 @@ module.exports = {
                         const username = mentionedUser.username;
                         const pointsToAward = 5; // 5 points for successful code execution
                         
-                        const existingMember = await getMemberByDiscordUsername(username);
+                        const todayKey = getTodayKey();
+                        const isRookie = await isRookieMember(message.guild, userId, username);
+                        const existingMember = isRookie ? null : await getMemberByDiscordUsername(username);
                         let newPoints = null;
 
-                        if (existingMember) {
+                        if (isRookie) {
+                            const rookieResult = updateRookiePoints({
+                                username,
+                                userId,
+                                channel: message.channel?.name,
+                                pointsToAward,
+                                todayKey,
+                            });
+
+                            if (!rookieResult.updated) {
+                                try {
+                                    await message.reply({
+                                        content: `✅ <@${userId}> You already earned today's **+${pointsToAward} points**. Keep solving and come back tomorrow!`,
+                                    });
+                                } catch (error) {
+                                    console.error('Could not send daily limit reply:', error.message);
+                                }
+                                return;
+                            }
+
+                            newPoints = rookieResult.points;
+                        } else if (existingMember) {
                             const dailyLog = readDailyPointsLog();
-                            const todayKey = getTodayKey();
                             const memberId = String(existingMember.member_id);
                             const lastAwardedDate = dailyLog.awards[memberId]?.lastAwardedDate;
 
