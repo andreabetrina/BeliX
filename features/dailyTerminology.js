@@ -30,23 +30,15 @@ function saveTerminologies(data) {
 }
 
 /**
- * Find the common hall channel
+ * Find the specific channel by ID
  */
-function findCommonHallChannel(guild) {
-    const channelId = process.env['common-hall'];
-    if (channelId) {
-        const channel = guild.channels.cache.get(channelId);
-        if (channel && channel.isTextBased()) {
-            return channel;
-        }
+function findTerminologyChannel(client) {
+    const channelId = '1304848106789015648';
+    const channel = client.channels.cache.get(channelId);
+    if (channel && channel.isTextBased()) {
+        return channel;
     }
-    // Fallback to name matching
-    const channelNames = ['common-hall', 'commonhall', 'common', 'hall', 'general'];
-    
-    return guild.channels.cache.find(ch => 
-        ch.isTextBased() && 
-        channelNames.some(name => ch.name.toLowerCase().includes(name))
-    );
+    return null;
 }
 
 /**
@@ -70,25 +62,24 @@ async function postDailyTerminology(client) {
         .setDescription(terminology.definition)
         .addFields(
             { name: '📂 Category', value: terminology.category, inline: true },
-            { name: '📅 Term #', value: `${data.currentIndex + 1}/${data.terminologies.length}`, inline: true }
+            { name: '📅 Term #', value: `${data.currentIndex + 1}/${data.terminologies.length}`, inline: true },
+            { name: '📖 Description', value: `**${terminology.description || 'No description available'}**` }
         )
         .setFooter({ text: 'Learn something new every day! 🚀' })
         .setTimestamp();
     
-    // Post to all guilds
-    for (const guild of client.guilds.cache.values()) {
-        const channel = findCommonHallChannel(guild);
-        
-        if (channel) {
-            try {
-                await channel.send({ embeds: [embed] });
-                console.log(`✓ Posted daily terminology to ${channel.name} in ${guild.name}`);
-            } catch (error) {
-                console.error(`Failed to post terminology in ${guild.name}:`, error.message);
-            }
-        } else {
-            console.log(`⚠ No common hall channel found in ${guild.name}`);
+    // Post to specific channel
+    const channel = findTerminologyChannel(client);
+    
+    if (channel) {
+        try {
+            await channel.send({ embeds: [embed] });
+            console.log(`✓ Posted daily terminology to ${channel.name}`);
+        } catch (error) {
+            console.error(`Failed to post terminology:`, error.message);
         }
+    } else {
+        console.log(`⚠ Terminology channel not found`);
     }
     
     // Update index for next day (cycle through)
@@ -100,13 +91,13 @@ async function postDailyTerminology(client) {
 }
 
 /**
- * Schedule daily terminology posting at 8:00 PM
+ * Schedule daily terminology posting at 8:00 AM
  */
 function scheduleDailyTerminology(client) {
     // Schedule the first posting
     function scheduleNext() {
-        const delay = getDelayUntilNextScheduledTime(20, 0); // 8:00 PM
-        console.log(`📅 Next terminology post scheduled in ${Math.round(delay / 1000 / 60)} minutes (8:00 PM Asia/Kolkata)`);
+        const delay = getDelayUntilNextScheduledTime(8, 0); // 8:00 AM
+        console.log(`📅 Next terminology post scheduled in ${Math.round(delay / 1000 / 60)} minutes (9:00 AM Asia/Kolkata)`);
         
         setTimeout(async () => {
             await postDailyTerminology(client);

@@ -4,57 +4,41 @@ const { getDelayUntilNextScheduledTime, getTimeWithTimezoneInfo, formatTimeInTim
 // Scheduled reminder times (24-hour format)
 const REMINDERS = [
     {
-        name: 'Daily Gathering',
-        hour: 18,
-        minute: 30,
-        message: '🎯 **Daily Gathering Time!** 🎯',
-        description: 'It\'s time for our daily gathering! Let\'s connect, share, and grow together. See you in the voice channel! 🎤',
-        color: '#FFD700',
-        channelNames: ['announcements', 'general', 'common-hall', 'common hall'],
-        envKey: 'announcements',
-    },
-    {
-        name: 'Progress Update (1st)',
+        name: 'Daily Progress Reminder',
         hour: 21,
         minute: 30,
-        message: '📊 **Progress Update Time - Round 1** 📊',
-        description: 'Time to share your progress! What have you accomplished today? Share your wins in Byte Bash Blitz! 💪',
+        message: '📊 Belmonts Daily Progress Reminder 📊',
+        description: `Hey Belmonts! It's time to check in 🚀
+What progress did you make today in **Byte Bash Blitz**?
+Post your updates, celebrate your wins, and keep pushing forward 💪✨`,
         color: '#00D9FF',
-        channelNames: ['byte-bash-blitz', 'progress', 'updates', 'announcements'],
-        envKey: 'announcements',
+        channelId: '1304853237471510639',
     },
     {
-        name: 'Progress Update (2nd)',
-        hour: 22,
+        name: 'Last Call Progress Reminder',
+        hour: 23,
         minute: 0,
-        message: '📈 **Progress Update Time - Round 2** 📈',
-        description: 'Second round of progress updates! Keep sharing your achievements and updates. Let\'s celebrate every milestone! 🎉',
-        color: '#00FF88',
-        channelNames: ['byte-bash-blitz', 'progress', 'updates', 'announcements'],
-        envKey: 'announcements',
+        message: '⏰ Last Call - Belmonts Daily Progress ⏰',
+        description: `🚨 This is your last call, Belmonts! 
+Don't miss out on sharing your progress in **Byte Bash Blitz** today!
+Post your final updates now and celebrate your achievements before we wrap up! 🎯✨`,
+        color: '#FF6B6B',
+        channelId: '1304853237471510639',
     },
 ];
 
 /**
- * Find a channel that matches the provided names or environment variable
+ * Find a channel by ID or name
  */
-function findTargetChannel(guild, channelNames, envKey) {
-    // First try environment variable if provided
-    if (envKey) {
-        const channelId = process.env[envKey];
-        if (channelId) {
-            const channel = guild.channels.cache.get(channelId);
-            if (channel && channel.type === ChannelType.GuildText && channel.permissionsFor(guild.members.me)?.has('SendMessages')) {
-                return channel;
-            }
+function findTargetChannel(client, reminder) {
+    // First try by channel ID if provided
+    if (reminder.channelId) {
+        const channel = client.channels.cache.get(reminder.channelId);
+        if (channel && channel.type === ChannelType.GuildText && channel.permissionsFor(channel.guild.members.me)?.has('SendMessages')) {
+            return channel;
         }
     }
-    // Fallback to name matching
-    return guild.channels.cache.find(ch =>
-        ch.type === ChannelType.GuildText &&
-        ch.permissionsFor(guild.members.me)?.has('SendMessages') &&
-        channelNames.some(name => ch.name.toLowerCase().includes(name))
-    );
+    return null;
 }
 
 /**
@@ -69,28 +53,26 @@ function createReminderEmbed(reminder) {
 }
 
 /**
- * Send scheduled reminder to all guilds
+ * Send scheduled reminder
  */
 async function sendScheduledReminder(client, reminder) {
     try {
         console.log(`⏰ Sending scheduled reminder: "${reminder.name}"`);
 
-        for (const guild of client.guilds.cache.values()) {
-            const channel = findTargetChannel(guild, reminder.channelNames, reminder.envKey);
+        const channel = findTargetChannel(client, reminder);
 
-            if (!channel) {
-                console.warn(`⚠ No suitable channel found in ${guild.name} for "${reminder.name}"`);
-                continue;
-            }
-
-            const embed = createReminderEmbed(reminder);
-
-            await channel.send({
-                embeds: [embed],
-            });
-
-            console.log(`✓ Reminder sent in ${guild.name} > #${channel.name}`);
+        if (!channel) {
+            console.warn(`⚠ Channel ${reminder.channelId} not found for "${reminder.name}"`);
+            return;
         }
+
+        const embed = createReminderEmbed(reminder);
+
+        await channel.send({
+            embeds: [embed],
+        });
+
+        console.log(`✓ Reminder sent in #${channel.name}`);
     } catch (error) {
         console.error(`Error sending reminder "${reminder.name}":`, error);
     }

@@ -15,12 +15,17 @@
       "username": "tark7070",
       "userId": "983755051208155227",
       "displayName": "AJ_encoded",
-      "points": 0,
+      "points": 5,
       "joinedAt": "2026-02-02T10:26:06.575Z",
       "roles": [
         "@everyone",
         "rookies"
-      ]
+      ],
+      "channel": "✨vibe-coding",
+      "count": 2,
+      "lastSeen": "2026-02-08T19:38:31.447Z",
+      "lastAwardedDate": "2026-02-09",
+      "lastAwardedAt": "2026-02-08T19:38:31.447Z"
     },
     {
       "username": "siva_5392",
@@ -48,12 +53,17 @@
       "username": "shabermohamad_16010",
       "userId": "1438025229774618734",
       "displayName": "Zenitzu",
-      "points": 0,
+      "points": 5,
       "joinedAt": "2026-02-02T10:31:13.955Z",
       "roles": [
         "@everyone",
         "rookies"
-      ]
+      ],
+      "channel": "✨vibe-coding",
+      "count": 2,
+      "lastSeen": "2026-02-08T19:46:24.970Z",
+      "lastAwardedDate": "2026-02-09",
+      "lastAwardedAt": "2026-02-08T19:46:24.970Z"
     },
     {
       "username": "v.lvignesh",
@@ -70,12 +80,17 @@
       "username": "haajiramufliha",
       "userId": "1463895354297684114",
       "displayName": "Haajira Mufliha",
-      "points": 0,
+      "points": 5,
       "joinedAt": "2026-02-02T12:35:49.958Z",
       "roles": [
         "@everyone",
         "rookies"
-      ]
+      ],
+      "channel": "✨vibe-coding",
+      "count": 2,
+      "lastSeen": "2026-02-08T19:43:08.269Z",
+      "lastAwardedDate": "2026-02-09",
+      "lastAwardedAt": "2026-02-08T19:43:08.269Z"
     },
     {
       "username": "susmitha0841",
@@ -125,5 +140,5 @@
   "roleName": "rookies",
   "guildId": "1304848105975578634",
   "totalRookies": 11,
-  "lastUpdated": "2026-02-07T11:33:02.598Z"
+  "lastUpdated": "2026-02-08T19:46:24.970Z"
 }

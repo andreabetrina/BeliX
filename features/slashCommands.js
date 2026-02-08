@@ -70,9 +70,22 @@ function buildHelpEmbed() {
             { name: '/next', value: 'Preview the next terminology (without changing today\'s).' },
             { name: '/prev', value: 'Preview the previous terminology.' },
             { name: '/dailyquestions', value: 'View today\'s daily programming question.' },
+            { name: '/rookiequestions', value: 'View today\'s rookie question number.' },
             { name: '/question <number>', value: 'View a specific question (1-129) with full details.' },
             { name: '/qd <difficulty>', value: 'Filter questions by difficulty level (Easy/Medium).' }
         )
+        .setTimestamp();
+}
+
+function buildRookieHelpEmbed() {
+    return new EmbedBuilder()
+        .setColor('#FFD700')
+        .setTitle('🎯 Rookie Commands')
+        .setDescription('As a rookie member, here\'s your available command:')
+        .addFields(
+            { name: '/rookiequestions', value: 'View today\'s rookie question with full details and explanation.' }
+        )
+        .setFooter({ text: '🚀 Focus on learning and growth!' })
         .setTimestamp();
 }
 
@@ -170,6 +183,22 @@ function getTodaysQuestion() {
     return todayQuestion || questions[0];
 }
 
+function getTodaysRookieQuestionNumber() {
+    const data = loadQuestionsData();
+    const startDate = new Date(data.startDate);
+    const today = new Date();
+    
+    // Calculate days elapsed since start date
+    const timeDiff = today - startDate;
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    
+    // Start from 10 and increase by 1 each day
+    const startQuestionNumber = data.startQuestionNumber || 109;
+    const todayRookieNumber = startQuestionNumber + daysDiff;
+    
+    return todayRookieNumber;
+}
+
 function buildQuestionsEmbed(questions, startIndex = 0, itemsPerPage = 5) {
     const questions_list = questions.slice(startIndex, startIndex + itemsPerPage);
     
@@ -222,11 +251,11 @@ function getQuestionsNavigationButtons(currentPage, totalPages) {
 function buildQuestionDetailEmbed(question) {
     const embed = new EmbedBuilder()
         .setColor('#27ae60')
-        .setTitle(`Day ${question.Day}: ${question.Question}`)
+        .setTitle(`📝 ${question.Question}`)
         .addFields(
-            { name: '📥 Input', value: question.Input, inline: false },
-            { name: '📤 Output', value: String(question.Output), inline: false },
-            { name: '📝 Explanation', value: question.Explain, inline: false }
+            { name: '📥 Input', value: `\`\`\`\n${question.Input}\n\`\`\``, inline: false },
+            { name: '📤 Output', value: `\`\`\`\n${String(question.Output)}\n\`\`\``, inline: false },
+            { name: '💡 Explanation', value: question.Explain, inline: false }
         );
     
     if (question.Difficulty) {
@@ -244,7 +273,6 @@ function buildQuestionDetailEmbed(question) {
         );
     }
     
-    embed.setFooter({ text: `Question ${question.Day}/129` });
     embed.setTimestamp();
     
     return embed;
@@ -328,6 +356,9 @@ function buildCommands() {
         new SlashCommandBuilder()
             .setName('dailyquestions')
             .setDescription('View today\'s daily programming question.'),
+        new SlashCommandBuilder()
+            .setName('rookiequestions')
+            .setDescription('View today\'s rookie question number.'),
         new SlashCommandBuilder()
             .setName('question')
             .setDescription('Get a specific programming question by number (1-129).')
@@ -455,10 +486,28 @@ function handleSlashCommands(client) {
 
         if (!interaction.isCommand()) return;
 
+        // Defer reply immediately to prevent interaction timeout (3-second window)
+        await interaction.deferReply({ ephemeral: false }).catch(e => console.error('Deferral error:', e));
+
         const { commandName } = interaction;
+        
+        // Check if user is a rookie
+        const userId = interaction.user.id;
+        const username = interaction.user.username;
+        const isRookie = await isRookieMember(interaction.guild, userId, username);
+        
+        // Rookies can only use /rookiequestions and /help commands
+        if (isRookie && commandName !== 'rookiequestions' && commandName !== 'help') {
+            return interaction.editReply({
+                content: '⚠️ As a rookie member, you only have access to the `/rookiequestions` command. Focus on learning and solving problems! 🚀'
+            });
+        }
 
         if (commandName === 'help') {
-            return interaction.reply({ embeds: [buildHelpEmbed()] });
+            if (isRookie) {
+                return interaction.editReply({ embeds: [buildRookieHelpEmbed()] });
+            }
+            return interaction.editReply({ embeds: [buildHelpEmbed()] });
         }
 
         if (commandName === 'leaderboard') {
@@ -468,7 +517,7 @@ function handleSlashCommands(client) {
             const embed = buildLeaderboardEmbed(leaderboardData, 1);
             const buttons = getLeaderboardButtons(1, totalPages);
 
-            return interaction.reply({ embeds: [embed], components: [buttons] });
+            return interaction.editReply({ embeds: [embed], components: [buttons] });
         }
 
         if (commandName === 'mypoints') {
@@ -487,7 +536,7 @@ function handleSlashCommands(client) {
                     .setDescription(`Hey ${displayName}! As a rookie member, your progress is being tracked separately. Keep learning and solving problems! 🚀`)
                     .setFooter({ text: 'Focus on learning and growth!' })
                     .setTimestamp();
-                return interaction.reply({ embeds: [embed] });
+                return interaction.editReply({ embeds: [embed] });
             } else {
                 // Get member data from database using Discord ID (members_discord_id)
                 let memberData = await getMemberByDiscordID(userId);
@@ -509,7 +558,7 @@ function handleSlashCommands(client) {
                         .setTitle('❌ Member Not Found')
                         .setDescription(`Sorry ${displayName}, you are not found in the members database. Please contact an admin to add you.`)
                         .setTimestamp();
-                    return interaction.reply({ embeds: [notFoundEmbed] });
+                    return interaction.editReply({ embeds: [notFoundEmbed] });
                 }
                 
                 // Get points for existing user
@@ -519,7 +568,7 @@ function handleSlashCommands(client) {
                     points: pointsData, 
                     last_update: new Date().toISOString() 
                 });
-                return interaction.reply({ embeds: [embed] });
+                return interaction.editReply({ embeds: [embed] });
             }
         }
 
@@ -527,44 +576,60 @@ function handleSlashCommands(client) {
             const embed = getTerminologyEmbed();
 
             if (!embed) {
-                return interaction.reply('No terminologies available.');
+                return interaction.editReply({ content: 'No terminologies available.' });
             }
 
-            return interaction.reply({ embeds: [embed] });
+            return interaction.editReply({ embeds: [embed] });
         }
 
         if (commandName === 'next') {
             const embed = getNextTerminologyEmbed();
 
             if (!embed) {
-                return interaction.reply('No terminologies available.');
+                return interaction.editReply({ content: 'No terminologies available.' });
             }
 
-            return interaction.reply({ embeds: [embed] });
+            return interaction.editReply({ embeds: [embed] });
         }
 
         if (commandName === 'prev') {
             const embed = getPreviousTerminologyEmbed();
 
             if (!embed) {
-                return interaction.reply('No terminologies available.');
+                return interaction.editReply({ content: 'No terminologies available.' });
             }
 
-            return interaction.reply({ embeds: [embed] });
+            return interaction.editReply({ embeds: [embed] });
         }
 
         if (commandName === 'dailyquestions') {
             const todayQuestion = getTodaysQuestion();
             
             if (!todayQuestion) {
-                return interaction.reply({
-                    content: '❌ No question available for today.',
-                    ephemeral: true
+                return interaction.editReply({
+                    content: '❌ No question available for today.'
                 });
             }
             
             const embed = buildQuestionDetailEmbed(todayQuestion);
-            return interaction.reply({ embeds: [embed] });
+            return interaction.editReply({ embeds: [embed] });
+        }
+
+        if (commandName === 'rookiequestions') {
+            const rookieQuestionNumber = getTodaysRookieQuestionNumber();
+            const questions = loadQuestions();
+            
+            // Find the rookie question by number
+            const rookieQuestion = questions.find(q => q.Day === rookieQuestionNumber);
+            
+            if (!rookieQuestion) {
+                return interaction.editReply({
+                    content: `❌ Today's rookie question #${rookieQuestionNumber} not found.`
+                });
+            }
+            
+            const embed = buildQuestionDetailEmbed(rookieQuestion);
+            return interaction.editReply({ embeds: [embed] });
         }
 
         if (commandName === 'question') {
@@ -575,14 +640,13 @@ function handleSlashCommands(client) {
             const question = questions.find(q => q.Day === questionNumber);
             
             if (!question) {
-                return interaction.reply({
-                    content: `❌ Question #${questionNumber} not found. Available questions: 1-129`,
-                    ephemeral: true
+                return interaction.editReply({
+                    content: `❌ Question #${questionNumber} not found. Available questions: 1-129`
                 });
             }
             
             const embed = buildQuestionDetailEmbed(question);
-            return interaction.reply({ embeds: [embed] });
+            return interaction.editReply({ embeds: [embed] });
         }
 
         if (commandName === 'qd') {
@@ -591,9 +655,8 @@ function handleSlashCommands(client) {
             const filteredQuestions = questions.filter(q => q.Difficulty === difficulty);
             
             if (filteredQuestions.length === 0) {
-                return interaction.reply({
-                    content: `❌ No ${difficulty} difficulty questions found.`,
-                    ephemeral: true
+                return interaction.editReply({
+                    content: `❌ No ${difficulty} difficulty questions found.`
                 });
             }
             
@@ -601,7 +664,7 @@ function handleSlashCommands(client) {
             const embed = buildDifficultyQuestionsEmbed(questions, difficulty, 0);
             const buttons = getDifficultyQuestionsNavigationButtons(difficulty, 1, totalPages);
 
-            return interaction.reply({ embeds: [embed], components: [buttons] });
+            return interaction.editReply({ embeds: [embed], components: [buttons] });
         }
     });
 }

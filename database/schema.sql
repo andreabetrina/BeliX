@@ -138,14 +138,19 @@ create index if not exists idx_meeting_attendance_member_id on public.meeting_at
 create table public.gathering_confirmations (
   confirmation_id bigserial not null,
   gathering_date date not null,
+  gathering_time time not null default '20:00:00',
   is_confirmed boolean not null default false,
   confirmed_by_id bigint null,
   confirmed_by_username text null,
   confirmed_at timestamp with time zone null,
+  cancelled_by_id bigint null,
+  cancelled_by_username text null,
+  cancelled_at timestamp with time zone null,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now(),
   constraint gathering_confirmations_pkey primary key (confirmation_id),
-  constraint gathering_confirmations_confirmed_by_fkey foreign key (confirmed_by_id) references members (member_id) on delete set null
+  constraint gathering_confirmations_confirmed_by_fkey foreign key (confirmed_by_id) references members (member_id) on delete set null,
+  constraint gathering_confirmations_cancelled_by_fkey foreign key (cancelled_by_id) references members (member_id) on delete set null
 ) TABLESPACE pg_default;
 
 create index if not exists idx_gathering_confirmations_date on public.gathering_confirmations using btree (gathering_date) TABLESPACE pg_default;

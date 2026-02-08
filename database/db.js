@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { getCurrentTimeInTimeZone } = require('../utils/timezoneUtils');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
@@ -441,26 +442,12 @@ async function getLeaderboard(limit = 100) {
 async function getMembersWithBirthdayToday() {
     if (!dbAvailable) return [];
     try {
-        const today = new Date();
-        const monthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        // Get current date in Asia/Kolkata timezone
+        const today = getCurrentTimeInTimeZone();
+        const todayMonth = today.getMonth() + 1;
+        const todayDate = today.getDate();
 
-        const { data, error } = await supabase
-            .rpc('get_birthdays_by_month_day', { month_day: monthDay });
-
-        if (error) console.error('Error fetching birthdays:', error);
-        
-        // Filter out excluded members
-        return (data || []).filter(member => !EXCLUDED_MEMBERS.includes(member.display_name) && !EXCLUDED_MEMBERS.includes(member.username));
-    } catch (error) {
-        console.error('Error getting today\'s birthdays:', error);
-        return [];
-    }
-}
-
-// For a simpler approach without a stored procedure, fetch all and filter client-side
-async function getMembersWithUpcomingBirthdays(daysAhead = 7) {
-    if (!dbAvailable) return [];
-    try {
+        // Fetch all members with birthday info
         const { data, error } = await supabase
             .from('members')
             .select('*')
@@ -471,7 +458,49 @@ async function getMembersWithUpcomingBirthdays(daysAhead = 7) {
             return [];
         }
 
-        const today = new Date();
+        // Filter for today's month and day
+        // Birthday is stored as "YYYY-MM-DD" date string, parse it directly to avoid timezone issues
+        const birthdayMembers = (data || []).filter(member => {
+            if (!member.birthday) return false;
+            
+            // Parse "YYYY-MM-DD" format directly without timezone conversion
+            const [year, month, day] = member.birthday.split('-').map(Number);
+            
+            return month === todayMonth && day === todayDate;
+        });
+
+        // Filter out excluded members
+        return birthdayMembers.filter(member => 
+            !EXCLUDED_MEMBERS.includes(member.display_name) && 
+            !EXCLUDED_MEMBERS.includes(member.username)
+        );
+    } catch (error) {
+        console.error('Error getting today\'s birthdays:', error);
+        return [];
+    }
+}
+
+// For upcoming birthdays within N days
+async function getMembersWithUpcomingBirthdays(daysAhead = 7) {
+    if (!dbAvailable) return [];
+    try {
+        // Get current date in Asia/Kolkata timezone
+        const today = getCurrentTimeInTimeZone();
+        const todayYear = today.getFullYear();
+        const todayMonth = today.getMonth() + 1;
+        const todayDate = today.getDate();
+
+        // Fetch all members with birthday info
+        const { data, error } = await supabase
+            .from('members')
+            .select('*')
+            .not('birthday', 'is', null);
+
+        if (error) {
+            console.error('Error fetching members with birthdays:', error);
+            return [];
+        }
+
         const upcoming = [];
 
         for (const member of data) {
@@ -482,17 +511,26 @@ async function getMembersWithUpcomingBirthdays(daysAhead = 7) {
 
             if (!member.birthday) continue;
 
-            const birthDate = new Date(member.birthday);
-            const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+            // Parse "YYYY-MM-DD" format directly without timezone conversion
+            const [bYear, bMonth, bDate] = member.birthday.split('-').map(Number);
 
+            // Calculate this year's birthday
+            let thisYearBirthday = new Date(todayYear, bMonth - 1, bDate);
+            
+            // If birthday has already passed this year, look at next year
             if (thisYearBirthday < today) {
-                thisYearBirthday.setFullYear(today.getFullYear() + 1);
+                thisYearBirthday = new Date(todayYear + 1, bMonth - 1, bDate);
             }
 
+            // Calculate days until birthday
             const daysUntilBirthday = Math.ceil((thisYearBirthday - today) / (1000 * 60 * 60 * 24));
 
             if (daysUntilBirthday <= daysAhead && daysUntilBirthday >= 0) {
-                upcoming.push({ ...member, daysUntilBirthday });
+                upcoming.push({ 
+                    ...member, 
+                    daysUntilBirthday,
+                    birthdayDate: `${bMonth}/${bDate}` 
+                });
             }
         }
 
@@ -882,10 +920,11 @@ async function getMeetings(limit = 30) {
     }
 }
 
-async function confirmGathering(memberId, username, gatheringDate) {
+async function confirmGathering(memberId, username, gatheringDate, gatheringTime = '20:00:00') {
     if (!dbAvailable) return null;
     try {
         const dateStr = gatheringDate ? new Date(gatheringDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        const timeStr = typeof gatheringTime === 'number' ? `${gatheringTime}:00:00` : gatheringTime;
         
         // Check if gathering confirmation already exists for today
         const { data: existing } = await supabase
@@ -899,17 +938,25 @@ async function confirmGathering(memberId, username, gatheringDate) {
             const { data, error } = await supabase
                 .from('gathering_confirmations')
                 .update({
+                    gathering_time: timeStr,
                     is_confirmed: true,
                     confirmed_by_id: memberId,
                     confirmed_by_username: username,
                     confirmed_at: new Date().toISOString(),
+                    cancelled_by_id: null,
+                    cancelled_by_username: null,
+                    cancelled_at: null,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('gathering_date', dateStr)
                 .select();
 
             if (error) {
-                console.error('Error confirming gathering:', error);
+                if (error.code === '23503') {
+                    console.debug('Note: User not yet synced to members table. Foreign key constraint.');
+                } else {
+                    console.error('Error confirming gathering:', error);
+                }
                 return null;
             }
             return data?.[0] || null;
@@ -919,6 +966,7 @@ async function confirmGathering(memberId, username, gatheringDate) {
                 .from('gathering_confirmations')
                 .insert({
                     gathering_date: dateStr,
+                    gathering_time: timeStr,
                     is_confirmed: true,
                     confirmed_by_id: memberId,
                     confirmed_by_username: username,
@@ -929,7 +977,11 @@ async function confirmGathering(memberId, username, gatheringDate) {
                 .select();
 
             if (error) {
-                console.error('Error creating gathering confirmation:', error);
+                if (error.code === '23503') {
+                    console.debug('Note: User not yet synced to members table. Foreign key constraint.');
+                } else {
+                    console.error('Error creating gathering confirmation:', error);
+                }
                 return null;
             }
             return data?.[0] || null;
@@ -940,7 +992,7 @@ async function confirmGathering(memberId, username, gatheringDate) {
     }
 }
 
-async function cancelGathering(gatheringDate) {
+async function cancelGathering(gatheringDate, cancelledById = null, cancelledByUsername = null) {
     if (!dbAvailable) return null;
     try {
         const dateStr = gatheringDate ? new Date(gatheringDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
@@ -952,6 +1004,9 @@ async function cancelGathering(gatheringDate) {
                 confirmed_by_id: null,
                 confirmed_by_username: null,
                 confirmed_at: null,
+                cancelled_by_id: cancelledById,
+                cancelled_by_username: cancelledByUsername,
+                cancelled_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })
             .eq('gathering_date', dateStr)
@@ -964,6 +1019,60 @@ async function cancelGathering(gatheringDate) {
         return data?.[0] || null;
     } catch (error) {
         console.error('Error cancelling gathering:', error);
+        return null;
+    }
+}
+
+async function updateGatheringTime(gatheringDate, newGatheringTime) {
+    if (!dbAvailable) return null;
+    try {
+        const dateStr = gatheringDate ? new Date(gatheringDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        const timeStr = typeof newGatheringTime === 'number' ? `${newGatheringTime}:00:00` : newGatheringTime;
+        
+        // Check if gathering confirmation exists for today
+        const { data: existing } = await supabase
+            .from('gathering_confirmations')
+            .select('*')
+            .eq('gathering_date', dateStr)
+            .single();
+
+        if (existing) {
+            // Update existing confirmation with new time
+            const { data, error } = await supabase
+                .from('gathering_confirmations')
+                .update({
+                    gathering_time: timeStr,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('gathering_date', dateStr)
+                .select();
+
+            if (error) {
+                console.error('Error updating gathering time:', error);
+                return null;
+            }
+            return data?.[0] || null;
+        } else {
+            // Create new gathering confirmation with time
+            const { data, error } = await supabase
+                .from('gathering_confirmations')
+                .insert({
+                    gathering_date: dateStr,
+                    gathering_time: timeStr,
+                    is_confirmed: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                })
+                .select();
+
+            if (error) {
+                console.error('Error creating gathering with time:', error);
+                return null;
+            }
+            return data?.[0] || null;
+        }
+    } catch (error) {
+        console.error('Error updating gathering time:', error);
         return null;
     }
 }
@@ -1066,6 +1175,7 @@ module.exports = {
     // Gathering Confirmation functions
     confirmGathering,
     cancelGathering,
+    updateGatheringTime,
     getGatheringStatus,
     getGatheringHistory,
 };

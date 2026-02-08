@@ -92,10 +92,10 @@ BeliX/
 ├── features/
 │   ├── birthdayAnnouncement.js      # Birthday announcements
 │   ├── channelSetup.js              # Channel configuration
+│   ├── dailyGatheringScheduler.js   # Daily gathering coordination & tracking
 │   ├── dailyQuestionPoster.js       # Question posting automation
 │   ├── dailyTerminology.js          # Terminology management
 │   ├── leaderboard.js               # Leaderboard display logic
-│   ├── meetingTracker.js            # Meeting tracking
 │   ├── memberSync.js                # Member synchronization
 │   ├── progressupdate.js            # Progress updates
 │   ├── scheduledReminders.js        # Reminder scheduling

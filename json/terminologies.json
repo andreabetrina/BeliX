@@ -4,573 +4,668 @@
       "category": "Programming & Development",
       "term": "Algorithm",
       "definition": "Step-by-step problem-solving procedure.",
-      "date": "Feb 5"
+      "description": "An algorithm is a finite set of instructions that, when executed, performs a specific task or solves a particular problem. Algorithms are fundamental to computer science and programming, as they provide a clear and efficient way to process data and achieve desired outcomes. They can be expressed in various forms, such as pseudocode, flowcharts, or programming languages.",
+      "date": "Feb 9"
     },
     {
       "category": "Programming & Development",
       "term": "Data Structure",
       "definition": "Organized way to store data (Arrays, Linked Lists, Stacks, Queues).",
-      "date": "Feb 6"
+      "description": "Data structures are specialized formats for organizing and storing data on a computer. They enable efficient access and modification of data. Common data structures include arrays, linked lists, stacks, and queues, each serving different purposes and use cases in programming.",
+      "date": "Feb 10"
     },
     {
       "category": "Programming & Development",
       "term": "OOP (Object-Oriented Programming)",
       "definition": "Programming using objects & classes.",
-      "date": "Feb 7"
+      "description": "Object-Oriented Programming is a software development paradigm that organizes code into reusable objects, rather than functions. OOP improves code modularity, reusability, and maintainability by grouping related data and methods. It uses concepts like classes, inheritance, and polymorphism to create scalable and organized codebases.",
+      "date": "Feb 11"
     },
     {
       "category": "Programming & Development",
       "term": "Class & Object",
       "definition": "Blueprint (Class) and its instance (Object).",
-      "date": "Feb 8"
+      "description": "A class is a theoretical blueprint used to define the structure and behavior of objects. An object is a concrete instance of a class with specific values for its properties. Classes provide a template for creating multiple objects with similar attributes and methods, enabling code reuse and organization.",
+      "date": "Feb 12"
     },
     {
       "category": "Programming & Development",
       "term": "Inheritance",
       "definition": "Reusing properties of a parent class.",
-      "date": "Feb 9"
+      "description": "Inheritance allows a class (child class) to inherit properties and methods from another class (parent class), promoting code reuse and establishing hierarchical relationships. This reduces code duplication and allows for more organized code structure through parent-child relationships.",
+      "date": "Feb 13"
     },
     {
       "category": "Programming & Development",
       "term": "Polymorphism",
       "definition": "One function, multiple forms (e.g., method overloading).",
-      "date": "Feb 10"
+      "description": "Polymorphism allows methods or functions to have multiple forms or behaviors. It includes method overloading (same method name, different parameters) and method overriding (child class redefining parent's method). This enables flexible code that can handle different data types and scenarios efficiently.",
+      "date": "Feb 14"
     },
     {
       "category": "Programming & Development",
       "term": "Encapsulation",
       "definition": "Bundling data with methods.",
-      "date": "Feb 11"
+      "description": "Encapsulation is the practice of bundling data (attributes) and methods (functions) that operate on that data within a single class, while hiding internal details from the outside world. It provides data security and control through access modifiers like private, protected, and public.",
+      "date": "Feb 15"
     },
     {
       "category": "Programming & Development",
       "term": "Abstraction",
       "definition": "Hiding complex details.",
-      "date": "Feb 12"
+      "description": "Abstraction is the concept of hiding the implementation details and showing only the essential features of an object. It simplifies complexity by allowing users to interact with high-level interfaces without needing to understand the underlying complex code mechanics.",
+      "date": "Feb 16"
     },
     {
       "category": "Programming & Development",
       "term": "Recursion",
       "definition": "Function calling itself.",
-      "date": "Feb 13"
+      "description": "Recursion is a programming technique where a function calls itself to solve a problem by breaking it into smaller subproblems. Every recursive function must have a base case to prevent infinite loops. Common examples include factorial calculation, tree traversal, and binary search.",
+      "date": "Feb 17"
     },
     {
       "category": "Programming & Development",
       "term": "Loop (for, while, do-while)",
       "definition": "Repeating code blocks.",
-      "date": "Feb 14"
+      "description": "Loops are control structures that execute a block of code multiple times until a condition is met. The 'for' loop is used for a known number of iterations, 'while' loop executes while a condition is true, and 'do-while' executes at least once before checking the condition.",
+      "date": "Feb 18"
     },
     {
       "category": "Programming & Development",
       "term": "Function/Method",
       "definition": "Reusable code block.",
-      "date": "Feb 15"
+      "description": "A function or method is a reusable block of code that performs a specific task. Functions accept parameters, process them, and return results. They promote code reuse, modularity, and maintainability by encapsulating logic that can be called multiple times throughout a program.",
+      "date": "Feb 19"
     },
     {
       "category": "Programming & Development",
       "term": "API (Application Programming Interface)",
       "definition": "Rules for software communication.",
-      "date": "Feb 16"
+      "description": "An API is a set of rules and protocols that define how different software components should interact. APIs allow applications to communicate with each other, enabling code reuse and integration. RESTful APIs are common for web services, enabling data exchange over HTTP.",
+      "date": "Feb 20"
     },
     {
       "category": "Programming & Development",
       "term": "Compiler",
       "definition": "Converts entire code to machine language.",
-      "date": "Feb 17"
+      "description": "A compiler is a program that translates the entire source code written in a high-level language into machine language (binary) before execution. This translation creates an executable file. Compiled languages like C++ and Java require compilation before running.",
+      "date": "Feb 21"
     },
     {
       "category": "Programming & Development",
       "term": "Interpreter",
       "definition": "Executes code line-by-line.",
-      "date": "Feb 18"
+      "description": "An interpreter is a program that reads and executes source code line-by-line, translating each line to machine code during runtime. Languages like Python and JavaScript use interpreters. This approach allows for immediate feedback but is typically slower than compiled code.",
+      "date": "Feb 22"
     },
     {
       "category": "Programming & Development",
       "term": "Debugging",
       "definition": "Finding & fixing errors in code.",
-      "date": "Feb 19"
+      "description": "Debugging is the systematic process of finding, analyzing, and removing errors (bugs) from software. It involves using debugging tools, logging, breakpoints, and testing strategies to identify issues and ensure the program behaves as intended.",
+      "date": "Feb 23"
     },
     {
       "category": "Programming & Development",
       "term": "IDE (Integrated Development Environment)",
       "definition": "Software for coding (VS Code, Eclipse).",
-      "date": "Feb 20"
+      "description": "An IDE is a comprehensive software suite that provides tools for developers to write, compile, debug, and test code in one place. IDEs like VS Code, Eclipse, and IntelliJ offer features like syntax highlighting, code completion, and integrated debugging capabilities.",
+      "date": "Feb 24"
     },
     {
       "category": "Programming & Development",
       "term": "Syntax Error",
       "definition": "Code violates language rules.",
-      "date": "Feb 21"
+      "description": "A syntax error occurs when the code violates the grammatical rules of the programming language. Syntax errors are detected by the compiler or interpreter before execution and must be fixed before the program can run. Examples include missing semicolons or unmatched brackets.",
+      "date": "Feb 25"
     },
     {
       "category": "Programming & Development",
       "term": "Runtime Error",
       "definition": "Error during program execution.",
-      "date": "Feb 22"
+      "description": "A runtime error occurs during program execution when the code encounters an unexpected condition or invalid operation. Examples include division by zero, accessing an array out of bounds, or null pointer exceptions. These errors cause the program to crash or behave unpredictably.",
+      "date": "Feb 26"
     },
     {
       "category": "Programming & Development",
       "term": "Logical Error",
       "definition": "Code runs but gives wrong output.",
-      "date": "Feb 23"
+      "description": "A logical error occurs when the code runs without crashing but produces incorrect or unexpected results. These are the hardest errors to find because the program doesn't crash; instead, it silently produces wrong output, requiring careful debugging and testing.",
+      "date": "Feb 27"
     },
     {
       "category": "Programming & Development",
       "term": "Git & GitHub",
       "definition": "Version control system for code.",
-      "date": "Feb 24"
+      "description": "Git is a distributed version control system that tracks changes in code, allowing developers to manage multiple versions and collaborate. GitHub is a cloud-based platform hosting Git repositories, enabling team collaboration, code review, and project management.",
+      "date": "Feb 28"
     },
     {
       "category": "Databases & SQL",
       "term": "Database (DBMS)",
       "definition": "System to store/manage data.",
-      "date": "Feb 25"
+      "description": "A database is an organized collection of structured data stored electronically in a computer system. A Database Management System (DBMS) is the software that allows creating, reading, updating, and deleting data efficiently. Popular DBMS include MySQL, PostgreSQL, and Oracle.",
+      "date": "Mar 1"
     },
     {
       "category": "Databases & SQL",
       "term": "SQL (Structured Query Language)",
       "definition": "Language for databases.",
-      "date": "Feb 26"
+      "description": "SQL is a standardized programming language used to interact with databases. It allows you to query, insert, update, and delete data. SQL features include SELECT, INSERT, UPDATE, DELETE, and JOIN operations for managing relational database data.",
+      "date": "Mar 2"
     },
     {
       "category": "Databases & SQL",
       "term": "NoSQL",
       "definition": "Non-relational databases (MongoDB).",
-      "date": "Feb 27"
+      "description": "NoSQL databases are non-relational databases designed for unstructured data. Unlike SQL databases with fixed schemas, NoSQL databases like MongoDB are flexible and scalable. They use document stores, key-value pairs, or graph structures for storing data.",
+      "date": "Mar 3"
     },
     {
       "category": "Databases & SQL",
       "term": "Primary Key",
       "definition": "Unique identifier in a table.",
-      "date": "Feb 28"
+      "description": "A primary key is a column or set of columns that uniquely identifies each row in a table. It ensures data integrity by preventing duplicate records and allowing efficient data retrieval. Primary keys are indexed automatically for faster searches.",
+      "date": "Mar 4"
     },
     {
       "category": "Databases & SQL",
       "term": "Foreign Key",
       "definition": "Links two tables.",
-      "date": "Mar 1"
+      "description": "A foreign key is a column in one table that references the primary key of another table, creating a relationship between tables. It maintains referential integrity by ensuring that every foreign key value corresponds to a valid primary key in the referenced table.",
+      "date": "Mar 5"
     },
     {
       "category": "Databases & SQL",
       "term": "Normalization",
       "definition": "Reducing database redundancy.",
-      "date": "Mar 2"
+      "description": "Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity. It follows rules (1NF, 2NF, 3NF) to ensure data is stored efficiently and consistently, preventing anomalies during data operations.",
+      "date": "Mar 6"
     },
     {
       "category": "Databases & SQL",
       "term": "Indexing",
       "definition": "Speeds up data retrieval.",
-      "date": "Mar 3"
+      "description": "Indexing is a database optimization technique that creates a data structure to speed up data retrieval operations. Indexes work like book indexes, allowing the database to find data quickly without scanning entire tables, significantly improving query performance.",
+      "date": "Mar 7"
     },
     {
       "category": "Databases & SQL",
       "term": "ACID Properties",
       "definition": "(Atomicity, Consistency, Isolation, Durability).",
-      "date": "Mar 4"
+      "description": "ACID properties ensure reliable database transactions: Atomicity (all-or-nothing), Consistency (valid state), Isolation (independent transactions), and Durability (permanent storage). These properties guarantee data integrity and reliability in database systems.",
+      "date": "Mar 8"
     },
     {
       "category": "Databases & SQL",
       "term": "CRUD Operations",
       "definition": "Create, Read, Update, Delete.",
-      "date": "Mar 5"
+      "description": "CRUD operations are the fundamental database operations: Create (INSERT), Read (SELECT), Update (UPDATE), and Delete (DELETE). These four operations form the basis of most database interactions and are essential for managing data in any application.",
+      "date": "Mar 9"
     },
     {
       "category": "Databases & SQL",
       "term": "Transaction",
       "definition": "A sequence of database operations.",
-      "date": "Mar 6"
+      "description": "A transaction is a sequence of database operations treated as a single unit. Transactions either succeed completely (commit) or fail completely (rollback), ensuring data consistency. This protects data integrity when multiple operations must be executed together.",
+      "date": "Mar 10"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Kernel",
       "definition": "Core part of OS managing hardware.",
-      "date": "Mar 7"
+      "description": "The kernel is the core component of an operating system that manages hardware resources and mediates between software and hardware. It handles memory management, process scheduling, device control, and provides essential services to all running programs.",
+      "date": "Mar 11"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Process",
       "definition": "Running instance of a program.",
-      "date": "Mar 8"
+      "description": "A process is an instance of a program being executed in memory. Each process has its own memory space, registers, and state. The OS manages multiple processes simultaneously, allocating resources and managing their lifecycle from creation to termination.",
+      "date": "Mar 12"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Thread",
       "definition": "Lightweight sub-process.",
-      "date": "Mar 9"
+      "description": "A thread is a lightweight sub-process that shares memory space with other threads within the same process. Threads allow concurrent execution within a single process, enabling parallel task execution and improved performance on multi-core systems.",
+      "date": "Mar 13"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Deadlock",
       "definition": "Two processes blocking each other.",
-      "date": "Mar 10"
+      "description": "A deadlock occurs when two or more processes are blocked forever, each waiting for resources held by the others. Deadlocks result from improper resource management and can cause system hang. Prevention, avoidance, and detection are strategies to handle deadlocks.",
+      "date": "Mar 14"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Scheduling (FCFS, Round Robin, SJF)",
       "definition": "CPU task management.",
-      "date": "Mar 11"
+      "description": "CPU scheduling determines which process executes next. Common algorithms include FCFS (First Come First Served), Round Robin (time-sharing), and SJF (Shortest Job First). Efficient scheduling maximizes CPU utilization and minimizes wait times.",
+      "date": "Mar 15"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Virtual Memory",
       "definition": "Using disk as extended RAM.",
-      "date": "Mar 12"
+      "description": "Virtual memory is a memory management technique that uses disk space as an extension of physical RAM. It allows processes to access more memory than physically available, though it's slower than RAM. This enables running larger applications on systems with limited physical memory.",
+      "date": "Mar 16"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "File System",
       "definition": "How OS stores files (NTFS, FAT32).",
-      "date": "Mar 13"
+      "description": "A file system is the method and structure the OS uses to organize and store files on storage devices. Different file systems like NTFS (Windows), FAT32, and ext4 (Linux) have different features for managing files, permissions, and data recovery.",
+      "date": "Mar 17"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Shell",
       "definition": "User interface to access OS.",
-      "date": "Mar 14"
+      "description": "A shell is the command-line interface (CLI) or graphical interface through which users interact with the OS. Shells like bash and PowerShell allow users to execute programs, manage files, and control system operations through commands or graphical elements.",
+      "date": "Mar 18"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Multitasking",
       "definition": "Running multiple tasks simultaneously.",
-      "date": "Mar 15"
+      "description": "Multitasking is the OS capability to run multiple processes or threads concurrently. The CPU rapidly switches between tasks, creating the illusion of simultaneous execution. This improves system efficiency and user experience by allowing multiple programs to run at once.",
+      "date": "Mar 19"
     },
     {
       "category": "Operating Systems (OS)",
       "term": "Cache Memory",
       "definition": "Fast memory for frequent data.",
-      "date": "Mar 16"
+      "description": "Cache memory is extremely fast memory located between the CPU and main RAM. It stores frequently accessed data, reducing access time significantly. Cache levels (L1, L2, L3) exist in CPU architecture, with higher levels being larger but slower.",
+      "date": "Mar 20"
     },
     {
       "category": "Networking & Web",
       "term": "IP Address",
       "definition": "Unique identifier for devices.",
-      "date": "Mar 17"
+      "description": "An IP address is a unique numerical identifier assigned to devices connected to a network. IPv4 (32-bit) and IPv6 (128-bit) are common formats. IP addresses enable devices to locate and communicate with each other across networks and the internet.",
+      "date": "Mar 21"
     },
     {
       "category": "Networking & Web",
       "term": "TCP/IP",
       "definition": "Internet communication protocol.",
-      "date": "Mar 18"
+      "description": "TCP/IP is the fundamental protocol suite for internet communication. TCP (Transmission Control Protocol) ensures reliable delivery, while IP (Internet Protocol) handles routing. Together, they form the foundation of modern internet and network communication.",
+      "date": "Mar 22"
     },
     {
       "category": "Networking & Web",
       "term": "HTTP/HTTPS",
       "definition": "Web data transfer protocols.",
-      "date": "Mar 19"
+      "description": "HTTP (HyperText Transfer Protocol) is used for transferring web content, while HTTPS adds encryption via SSL/TLS for secure communication. HTTPS protects data from interception, making it essential for sensitive transactions like online banking and e-commerce.",
+      "date": "Mar 23"
     },
     {
       "category": "Networking & Web",
       "term": "DNS (Domain Name System)",
       "definition": "Converts URLs to IPs.",
-      "date": "Mar 20"
+      "description": "DNS is a distributed system that translates human-readable domain names (like google.com) into IP addresses. It acts as the internet's phonebook, enabling users to access websites without remembering complex IP addresses.",
+      "date": "Mar 24"
     },
     {
       "category": "Networking & Web",
       "term": "Firewall",
       "definition": "Security system blocking threats.",
-      "date": "Mar 21"
+      "description": "A firewall is a security system that monitors and controls incoming and outgoing network traffic based on predetermined security rules. Firewalls can be hardware-based or software-based and protect networks from unauthorized access and malicious attacks.",
+      "date": "Mar 25"
     },
     {
       "category": "Networking & Web",
       "term": "Router",
       "definition": "Device directing network traffic.",
-      "date": "Mar 22"
+      "description": "A router is a networking device that forwards data between different networks based on IP addresses. It connects devices to the internet and manages traffic between local networks and external networks, functioning as a gateway.",
+      "date": "Mar 26"
     },
     {
       "category": "Networking & Web",
       "term": "Latency",
       "definition": "Delay in data transfer.",
-      "date": "Mar 23"
+      "description": "Latency is the delay between sending data and receiving a response. It's measured in milliseconds and affects user experience in applications like video calls, online gaming, and web browsing. Lower latency indicates faster, more responsive communication.",
+      "date": "Mar 27"
     },
     {
       "category": "Networking & Web",
       "term": "Bandwidth",
       "definition": "Maximum data transfer rate.",
-      "date": "Mar 24"
+      "description": "Bandwidth is the maximum amount of data that can be transmitted over a network connection in a given time, typically measured in Mbps or Gbps. It determines how much information can be transferred simultaneously between devices and networks.",
+      "date": "Mar 28"
     },
     {
       "category": "Networking & Web",
       "term": "Cloud Computing",
       "definition": "Remote servers over the internet (AWS, Azure).",
-      "date": "Mar 25"
+      "description": "Cloud computing delivers services like computing power, storage, and applications over the internet from remote servers. Providers like AWS, Azure, and Google Cloud offer scalable, flexible infrastructure without physical hardware ownership.",
+      "date": "Mar 29"
     },
     {
       "category": "Networking & Web",
       "term": "VPN (Virtual Private Network)",
       "definition": "Secure private network over the internet.",
-      "date": "Mar 26"
+      "description": "A VPN is a technology that creates an encrypted, secure connection over public networks like the internet. It hides user IP addresses and encrypts data, providing privacy and security when accessing the internet or remote networks.",
+      "date": "Mar 30"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Array",
       "definition": "Fixed-size sequential data.",
-      "date": "Mar 27"
+      "description": "An array is a linear data structure that stores multiple elements of the same type in contiguous memory locations. Arrays have fixed size and allow random access to elements using indices, making them efficient for sequential data storage and retrieval.",
+      "date": "Mar 31"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Linked List",
       "definition": "Dynamic data structure (Singly/Doubly LL).",
-      "date": "Mar 28"
+      "description": "A linked list is a dynamic data structure where elements (nodes) are connected via pointers. Singly linked lists have one pointer per node, while doubly linked lists have two. Linked lists allow efficient insertion and deletion but require more memory than arrays.",
+      "date": "Apr 1"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Stack (LIFO)",
       "definition": "Last-In-First-Out structure.",
-      "date": "Mar 29"
+      "description": "A stack is a linear data structure following the Last-In-First-Out (LIFO) principle. Elements are added and removed from the top (push and pop operations). Stacks are used in function calls, undo mechanisms, and expression evaluation.",
+      "date": "Apr 2"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Queue (FIFO)",
       "definition": "First-In-First-Out structure.",
-      "date": "Mar 30"
+      "description": "A queue is a linear data structure following the First-In-First-Out (FIFO) principle. Elements are added at the rear and removed from the front (enqueue and dequeue operations). Queues are used in task scheduling, printer queues, and breadth-first search.",
+      "date": "Apr 3"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Tree",
       "definition": "Hierarchical data structure.",
-      "date": "Mar 31"
+      "description": "A tree is a hierarchical data structure with a root node and child nodes, forming parent-child relationships. Trees enable efficient searching, sorting, and organization of hierarchical data. Common tree types include binary trees, AVL trees, and B-trees.",
+      "date": "Apr 4"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Binary Tree",
       "definition": "Tree with max two children per node.",
-      "date": "Apr 1"
+      "description": "A binary tree is a tree structure where each node has at most two children (left and right). Binary trees are fundamental for many applications like binary search trees, heaps, and expression parsing. They enable efficient divide-and-conquer algorithms.",
+      "date": "Apr 5"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "BST (Binary Search Tree)",
       "definition": "Sorted binary tree.",
-      "date": "Apr 2"
+      "description": "A Binary Search Tree is a binary tree where the left child is smaller and the right child is larger than the parent node. BSTs maintain sorted order and enable efficient searching in O(log n) average time, making them useful for maintaining sorted dynamic data.",
+      "date": "Apr 6"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Graph",
       "definition": "Nodes connected by edges.",
-      "date": "Apr 3"
+      "description": "A graph is a data structure consisting of nodes (vertices) connected by edges. Graphs can be directed or undirected, weighted or unweighted. They model real-world relationships like social networks, road maps, and computer networks.",
+      "date": "Apr 7"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Hash Table",
       "definition": "Key-value storage (O(1) avg. time).",
-      "date": "Apr 4"
+      "description": "A hash table uses a hash function to map keys to values, enabling constant-time average search, insertion, and deletion. Hash tables are used in implementing dictionaries, caching, and databases. Collision handling strategies include chaining and open addressing.",
+      "date": "Apr 8"
     },
     {
       "category": "Data Structures & Algorithms (DSA)",
       "term": "Big-O Notation",
       "definition": "Measures algorithm efficiency.",
-      "date": "Apr 5"
+      "description": "Big-O notation describes how an algorithm's runtime or space grows relative to input size. It helps developers compare algorithm efficiency (O(1), O(log n), O(n), O(n²), etc.). This is crucial for selecting appropriate algorithms for large datasets.",
+      "date": "Apr 9"
     },
     {
       "category": "Software Engineering",
       "term": "SDLC (Software Development Life Cycle)",
       "definition": "Stages of software creation.",
-      "date": "Apr 6"
+      "description": "SDLC is a structured process for developing software from planning through deployment and maintenance. It includes phases like requirements gathering, design, development, testing, and deployment. SDLC ensures systematic, efficient, and quality software development.",
+      "date": "Apr 10"
     },
     {
       "category": "Software Engineering",
       "term": "Agile Methodology",
       "definition": "Iterative development approach.",
-      "date": "Apr 7"
+      "description": "Agile is a software development methodology emphasizing iterative development, continuous feedback, and rapid prototyping. It values individuals, interactions, working software, and responding to change over rigid planning, improving flexibility and responsiveness.",
+      "date": "Apr 11"
     },
     {
       "category": "Software Engineering",
       "term": "Scrum",
       "definition": "Agile framework for teamwork.",
-      "date": "Apr 8"
+      "description": "Scrum is an Agile framework for managing software projects using sprints, daily standups, and retrospectives. It promotes teamwork, transparency, and continuous improvement. Scrum includes roles like Scrum Master, Product Owner, and Development Team.",
+      "date": "Apr 12"
     },
     {
       "category": "Software Engineering",
       "term": "Waterfall Model",
       "definition": "Linear project approach.",
-      "date": "Apr 9"
+      "description": "The Waterfall model is a sequential software development approach where each phase (requirements, design, implementation, testing) must be completed before the next begins. It's linear and rigid, suitable for projects with well-defined requirements but less flexible than Agile.",
+      "date": "Apr 13"
     },
     {
       "category": "Software Engineering",
       "term": "Testing (Unit, Integration, System)",
       "definition": "Checking software for bugs.",
-      "date": "Apr 10"
+      "description": "Software testing verifies that code works correctly. Unit testing checks individual components, integration testing checks component interaction, and system testing checks the entire application. Testing ensures quality, reliability, and performance before deployment.",
+      "date": "Apr 14"
     },
     {
       "category": "Software Engineering",
       "term": "Debugging",
       "definition": "Fixing errors in code.",
-      "date": "Apr 11"
+      "description": "Debugging is the process of identifying and removing errors from software. It uses tools like debuggers, logging, and breakpoints to trace execution and find issues. Effective debugging skills are crucial for maintaining and improving software quality.",
+      "date": "Apr 15"
     },
     {
       "category": "Software Engineering",
       "term": "Version Control (Git, SVN)",
       "definition": "Tracking code changes.",
-      "date": "Apr 12"
+      "description": "Version control systems track and manage code changes over time, enabling collaboration and history tracking. Git is the most popular distributed version control system, allowing developers to work independently and merge changes seamlessly.",
+      "date": "Apr 16"
     },
     {
       "category": "Software Engineering",
       "term": "CI/CD (Continuous Integration/Deployment)",
       "definition": "Automating software delivery.",
-      "date": "Apr 13"
+      "description": "CI/CD automates testing and deployment processes. Continuous Integration merges code changes frequently with automated testing, while Continuous Deployment automatically releases to production. This reduces manual errors, speeds up development, and improves software quality.",
+      "date": "Apr 17"
     },
     {
       "category": "Software Engineering",
       "term": "UML (Unified Modeling Language)",
       "definition": "Diagramming software design.",
-      "date": "Apr 14"
+      "description": "UML is a standardized visual language for modeling software systems. It includes diagrams like class diagrams, sequence diagrams, and use case diagrams. UML helps communicate design ideas and documents system architecture clearly.",
+      "date": "Apr 18"
     },
     {
       "category": "Software Engineering",
       "term": "API Testing",
       "definition": "Checking API functionality.",
-      "date": "Apr 15"
+      "description": "API testing validates that APIs work correctly and meet specifications. It tests endpoints, responses, error handling, and performance. Tools like Postman automate API testing, ensuring APIs are reliable and perform well before deployment.",
+      "date": "Apr 19"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Encryption",
       "definition": "Securing data using algorithms.",
-      "date": "Apr 16"
+      "description": "Encryption converts readable data (plaintext) into unreadable form (ciphertext) using algorithms and keys. It protects data from unauthorized access during transmission and storage. Common encryption methods include AES, RSA, and SSL/TLS.",
+      "date": "Apr 20"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Decryption",
       "definition": "Converting encrypted data back.",
-      "date": "Apr 17"
+      "description": "Decryption is the process of converting encrypted data (ciphertext) back into readable form (plaintext) using the correct key and algorithm. Only authorized users with the correct key can decrypt encrypted data, maintaining confidentiality.",
+      "date": "Apr 21"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Malware",
       "definition": "Harmful software (virus, trojan).",
-      "date": "Apr 18"
+      "description": "Malware is malicious software designed to harm, exploit, or compromise systems. Types include viruses, trojans, worms, ransomware, and spyware. Malware can steal data, damage systems, or grant unauthorized access to attackers.",
+      "date": "Apr 22"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Phishing",
       "definition": "Fraudulent attempts to steal data.",
-      "date": "Apr 19"
+      "description": "Phishing is a social engineering attack using deceptive emails or messages to trick users into revealing sensitive information. Attackers impersonate trusted sources to steal passwords, credit cards, and personal data. User awareness is crucial for prevention.",
+      "date": "Apr 23"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Brute Force Attack",
       "definition": "Trying all password combinations.",
-      "date": "Apr 20"
+      "description": "A brute force attack systematically tries all possible password combinations until finding the correct one. It's computationally expensive but effective against weak passwords. Rate limiting, account lockouts, and strong passwords are defenses against brute force.",
+      "date": "Apr 24"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Two-Factor Authentication (2FA)",
       "definition": "Extra login security.",
-      "date": "Apr 21"
+      "description": "Two-factor authentication adds an extra security layer by requiring two forms of verification: something you know (password) and something you have (phone, OTP). 2FA significantly improves account security even if passwords are compromised.",
+      "date": "Apr 25"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Ethical Hacking",
       "definition": "Legal hacking to improve security.",
-      "date": "Apr 22"
+      "description": "Ethical hacking involves authorized testing of systems to find vulnerabilities before malicious hackers do. Ethical hackers work with organizations to improve security. They follow legal and ethical guidelines and have explicit permission to test systems.",
+      "date": "Apr 26"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Penetration Testing",
       "definition": "Simulating cyberattacks.",
-      "date": "Apr 23"
+      "description": "Penetration testing is an authorized simulated cyberattack to evaluate security. Testers attempt to exploit vulnerabilities to identify weaknesses. Results guide security improvements. It's a systematic approach to finding and fixing security issues before real attacks occur.",
+      "date": "Apr 27"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "GDPR (General Data Protection Regulation)",
       "definition": "Data privacy law.",
-      "date": "Apr 24"
+      "description": "GDPR is a European Union regulation protecting personal data privacy. It requires organizations to respect user privacy, get consent, and report data breaches. GDPR gives users rights to access and delete personal data, significantly impacting global data practices.",
+      "date": "Apr 28"
     },
     {
       "category": "Cybersecurity & Ethics",
       "term": "Cyber Law (IT Act, India)",
       "definition": "Legal rules for digital activities.",
-      "date": "Apr 25"
+      "description": "Cyber laws regulate digital activities and protect against cybercrime. India's IT Act addresses data protection, intellectual property, and cybersecurity. These laws ensure accountability, protect users and organizations, and provide remedies for digital crimes.",
+      "date": "Apr 29"
     },
     {
       "category": "Emerging Technologies",
       "term": "AI (Artificial Intelligence)",
       "definition": "Machines mimicking human intelligence.",
-      "date": "Apr 26"
+      "description": "AI encompasses technologies enabling machines to simulate human intelligence like learning, reasoning, and decision-making. Applications include chatbots, recommendation systems, and autonomous vehicles. AI is transforming industries and society fundamentally.",
+      "date": "Apr 30"
     },
     {
       "category": "Emerging Technologies",
       "term": "ML (Machine Learning)",
       "definition": "AI subset where systems learn from data.",
-      "date": "Apr 27"
+      "description": "Machine Learning enables systems to learn and improve from data without explicit programming. ML algorithms identify patterns in data to make predictions or decisions. Applications include image recognition, fraud detection, and personalized recommendations.",
+      "date": "May 1"
     },
     {
       "category": "Emerging Technologies",
       "term": "Deep Learning",
       "definition": "ML using neural networks.",
-      "date": "Apr 28"
+      "description": "Deep Learning uses artificial neural networks with multiple layers to process complex data. It excels at image and speech recognition, natural language processing, and game-playing. Deep Learning powers modern AI breakthroughs in various domains.",
+      "date": "May 2"
     },
     {
       "category": "Emerging Technologies",
       "term": "Neural Network",
       "definition": "Brain-inspired algorithm.",
-      "date": "Apr 29"
+      "description": "Neural networks are computational models inspired by biological brains, consisting of interconnected nodes (neurons). They process information through layers, learning patterns from data. Neural networks power deep learning and modern AI applications.",
+      "date": "May 3"
     },
     {
       "category": "Emerging Technologies",
       "term": "Blockchain",
       "definition": "Decentralized ledger (Bitcoin, Ethereum).",
-      "date": "Apr 30"
+      "description": "Blockchain is a distributed ledger technology maintaining a chain of cryptographically secured blocks. Each block contains transaction data and references the previous block. Blockchain enables secure, transparent, and decentralized transactions without intermediaries.",
+      "date": "May 4"
     },
     {
       "category": "Emerging Technologies",
       "term": "IoT (Internet of Things)",
       "definition": "Smart connected devices.",
-      "date": "May 1"
+      "description": "IoT refers to physical devices with embedded sensors and internet connectivity that collect and share data. IoT applications include smart homes, wearables, and industrial monitoring. IoT enables automation, real-time monitoring, and intelligent decision-making.",
+      "date": "May 5"
     },
     {
       "category": "Emerging Technologies",
       "term": "AR/VR (Augmented/Virtual Reality)",
       "definition": "Digital overlays on real world.",
-      "date": "May 2"
+      "description": "AR overlays digital content onto the real world through devices like phones or glasses, while VR creates fully immersive virtual environments. These technologies have applications in gaming, training, medicine, and entertainment, enhancing user experiences.",
+      "date": "May 6"
     },
     {
       "category": "Emerging Technologies",
       "term": "Quantum Computing",
       "definition": "Super-fast computing using qubits.",
-      "date": "May 3"
+      "description": "Quantum computing uses quantum bits (qubits) that leverage superposition and entanglement for exponential computational power. Unlike classical bits, qubits can be 0, 1, or both simultaneously. Quantum computing promises solutions to currently intractable problems.",
+      "date": "May 7"
     },
     {
       "category": "Emerging Technologies",
       "term": "5G Technology",
       "definition": "Next-gen high-speed internet.",
-      "date": "May 4"
+      "description": "5G is the fifth-generation wireless technology offering significantly higher speeds, lower latency, and greater capacity than 4G. It enables ultrafast downloads, real-time applications, and supports IoT at scale, revolutionizing mobile connectivity.",
+      "date": "May 8"
     },
     {
       "category": "Emerging Technologies",
       "term": "Edge Computing",
       "definition": "Processing data near its source.",
-      "date": "May 5"
+      "description": "Edge computing processes data closer to the source (edge devices) rather than centrally in the cloud. This reduces latency, improves performance, and enhances privacy. Edge computing is crucial for IoT, autonomous vehicles, and real-time applications.",
+      "date": "May 9"
     },
     {
       "category": "Mathematics for CS",
       "term": "Discrete Mathematics",
       "definition": "Math for CS (logic, sets, graphs).",
-      "date": "May 6"
+      "description": "Discrete Mathematics deals with finite, countable mathematical structures like logic, sets, graphs, and combinatorics. It provides the mathematical foundation for algorithms, data structures, and computational theory, making it essential for computer scientists.",
+      "date": "May 10"
     },
     {
       "category": "Mathematics for CS",
       "term": "Boolean Algebra",
       "definition": "Math of true/false logic.",
-      "date": "May 7"
+      "description": "Boolean Algebra deals with true/false values and logical operations (AND, OR, NOT). It forms the foundation of digital logic and programming control structures. Boolean expressions are fundamental to computing and circuit design.",
+      "date": "May 11"
     },
     {
       "category": "Mathematics for CS",
       "term": "Linear Algebra",
       "definition": "Vectors, matrices for ML/graphics.",
-      "date": "May 8"
+      "description": "Linear Algebra studies vectors and matrices for representing and manipulating data. It's essential for machine learning algorithms, computer graphics, and neural networks. Matrix operations enable efficient data processing and transformations.",
+      "date": "May 12"
     },
     {
       "category": "Mathematics for CS",
       "term": "Probability & Statistics",
       "definition": "Essential for AI/ML.",
-      "date": "May 9"
+      "description": "Probability and Statistics deal with chance, distributions, and data analysis. They're fundamental for machine learning, data science, and decision-making under uncertainty. Statistical methods enable data-driven insights and reliable predictions.",
+      "date": "May 13"
     },
     {
       "category": "Mathematics for CS",
       "term": "Calculus",
       "definition": "Used in optimization (e.g., gradient descent).",
-      "date": "May 10"
+      "description": "Calculus involves limits, derivatives, and integrals for analyzing functions and optimization. It's used in machine learning for gradient descent algorithms, neural network training, and function optimization to find minimum or maximum values.",
+      "date": "May 14"
     }
   ],
   "currentIndex": 0,
-  "lastPostedDate": "2026-02-05T09:05:01.416Z"
+  "lastPostedDate": "2026-02-08T18:08:01.102Z"
 }
